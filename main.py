@@ -361,20 +361,19 @@ try:
     y = (screen_height // 2) - (height // 2)
                 
     root.geometry(f"{width}x{height}+{x}+{y}")
-    root.configure(bg="lightgreen")
     root.withdraw()
 
 
     tk.Label(root, 
             text="ברוך הבא לאפליקצית המשוב\n כדי להתחיל\n בבקשה תכניס את שם המשתמש והסיסמה שלך ", 
             font="Arial 14 bold", 
-            bg="lightgreen").pack(side="top", pady=(50,0))
+            fg="blue").pack(side="top", pady=(50,0))
 
-    tk.Label(root, text="שם משתמש", font="Arial 14", bg="lightgreen").pack(pady=(40, 10))
+    tk.Label(root, text="שם משתמש", fg="blue", font="Arial 14",).pack(pady=(40, 10))
     entry_username = tk.Entry(root, width=25, bg="white")
     entry_username.pack()
 
-    tk.Label(root, text="סיסמה", font="Arial 14", bg="lightgreen").pack(pady=(10,0))
+    tk.Label(root, text="סיסמה", font="Arial 14", fg="blue").pack(pady=(10,0))
     entry_password = tk.Entry(root, width=25, bg="white", show="*")
     entry_password.pack(pady=7)
 
@@ -392,24 +391,25 @@ try:
             text="?שכחת את הסיסמה", 
             font=5, 
             command=forgotpass,
-            bg="lightgreen", 
             fg="blue", 
             bd=0,
             cursor="hand2",).pack()
 
     tk.Label(root, 
             text="בכך שאתה מכניס את שם המשתמש והסיסמה שלך\n אתה בעצם מסכים עם כל ה\n", 
-            font="Arial 11 bold", 
-            bg="lightgreen").pack(pady=(40,0))
+            font="Arial 11 bold",).pack(pady=(40,0))
 
     tk.Button(root, 
             text="המדיניות והפרטיות שלנו", 
             font=5, 
             command=p_p,
-            bg="lightgreen", 
             fg="red", 
             bd=0,
             cursor="hand2",).pack()
+    
+    tk.Label(root,
+             text="📖",
+             font=("Arial", 60)).pack()
 
 
 
