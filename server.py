@@ -96,6 +96,19 @@ try:
                     print(f"[+] sending '200 ok' to client: {addr}")
                     conn.sendall("200 ok".encode('utf-8'))
                     print("[+] sent.")
+                
+                elif dataFromClient.startswith("get_schedule|"):
+                    class_name = dataFromClient.split("|")[1]
+                    try:
+                        with open("schedule.json", "r", encoding="utf-8") as f:
+                            schedules = json.load(f)
+                            class_schedule = schedules.get(class_name, {})
+                            conn.sendall(json.dumps(class_schedule, ensure_ascii=False).encode('utf-8'))
+                    except FileNotFoundError:
+                        conn.sendall("error|file not found".encode('utf-8'))
+                
+                elif dataFromClient == "sign up":
+                    pass
 
             except Exception as e:
                 print(f"[+] Error handling client {addr}: {e}")

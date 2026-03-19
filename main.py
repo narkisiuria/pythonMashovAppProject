@@ -4,7 +4,6 @@ try:
     import socket
     import tkinter as tk
     from tkinter import messagebox
-    import login as l
     from tkinter import ttk
     import json
     import os
@@ -34,7 +33,7 @@ try:
         splash_root.overrideredirect(True)
         splash_root.geometry("420x580")
 
-        TEXT_MAIN = "white"
+        TEXT_MAIN = "white" 
         TEXT_SUB = "#e0e0e0"
         BTN_BG = "#ffffff"
         BTN_FG = "#4a00e0"
@@ -121,9 +120,18 @@ try:
     def open_peak():
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
-        
         new_win.title("עמוד ראשי")
-        new_win.geometry("400x620+400+500")
+        
+        width = 400
+        height = 620
+        
+        screen_width = new_win.winfo_screenwidth()
+        screen_height = new_win.winfo_screenheight()
+        
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        
+        new_win.geometry(f"{width}x{height}+{x}+{y}")
 
         tk.Label(new_win, 
                 font="Arial 10 bold").pack(side="top", pady=(10,0))
@@ -340,13 +348,12 @@ try:
     #                      עמוד פתיחה                  #
     ###########################################################
 
-    def forgotpass():
+    def forgotPass():
         messagebox.showinfo(title="?שכחת את הסיסמה", message="שנה את סיסמתך במשרד המזכירות בבית הספר")
 
 
     def p_p():
         messagebox.showinfo(title="מדיניות והפרטיות", message="קיצר, אנחנו מחליטים על בערך הכל")
-
  
 
     root = tk.Tk()
@@ -390,20 +397,27 @@ try:
     tk.Button(root, 
             text="?שכחת את הסיסמה", 
             font=5, 
-            command=forgotpass,
+            command=forgotPass,
             fg="blue", 
             bd=0,
             cursor="hand2",).pack()
-
+    
+    tk.Button(root,
+              text="הרשמה למערכת",
+              font=6,
+              fg="blue",
+              bd=0,
+              cursor="hand2",).pack(pady=0)
+    
     tk.Label(root, 
             text="בכך שאתה מכניס את שם המשתמש והסיסמה שלך\n אתה בעצם מסכים עם כל ה\n", 
-            font="Arial 11 bold",).pack(pady=(40,0))
+            font="Arial 11 bold",).pack(pady=(10,0))
 
     tk.Button(root, 
             text="המדיניות והפרטיות שלנו", 
             font=5, 
             command=p_p,
-            fg="red", 
+            fg="blue", 
             bd=0,
             cursor="hand2",).pack()
     
@@ -790,6 +804,7 @@ try:
                         else:
                                 messagebox.showerror("שגיאה", "לא נמצא תזכורון קיים")
                                 break
+                        
         tk.Button(new_win, 
                 text="חזרה למסך ראשי",
                 command=lambda: open_main_page(current_username),
@@ -1066,12 +1081,10 @@ try:
                 command=freer_completed,
                 cursor="hand2",).place(x=13, y=560)
 
-        
     def open_marechet():
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
-
-        new_win.title("עמוד מערכת")
+        new_win.title("מערכת שעות")
         width = 400
         height = 620
                 
@@ -1083,13 +1096,91 @@ try:
                     
         new_win.geometry(f"{width}x{height}+{x}+{y}")
 
-        tk.Button(new_win, 
-                text="חזרה למסך ראשי",
-                command=lambda: open_main_page(current_username),
-                cursor="hand2",).place(x=10, y=10)
-
-        tk.Label(new_win, text="מערכת", font="Arial 21 bold").place(x=155, y=45)
+        tk.Button(new_win,
+                  text="חזרה",
+                  command=lambda:
+                      open_main_page(current_username)).pack(anchor="nw",padx=10, pady=10)
         
+        tk.Label(new_win,
+                 text="מערכת שעות שבועית",
+                 font="Arial 18 bold",
+                 fg="blue").pack(pady=(0, 10))
+
+        filter_frame = tk.Frame(new_win)
+        filter_frame.pack(pady=5)
+
+        tk.Label(filter_frame, text=":כיתה", font="Arial 12").grid(row=0, column=3, padx=5)
+        class_cb = ttk.Combobox(filter_frame, 
+                                values=["ט'1", "ט'2", "ט'3", "ט'4", "ט'5", "ט'6",], 
+                                width=5, 
+                                state="readonly", 
+                                justify="center",)
+        class_cb.set("ט'1") 
+        class_cb.grid(row=0, column=2, padx=5)
+
+        tk.Label(filter_frame, text=":יום", font="Arial 12").grid(row=0, column=1, padx=5)
+        day_cb = ttk.Combobox(filter_frame, 
+                              values=["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"], 
+                              width=8, 
+                              state="readonly", 
+                              justify="center",)
+        day_cb.set("ראשון") 
+        day_cb.grid(row=0, column=0, padx=5)
+
+        columns = ("שעה", "שיעור")
+        tree = ttk.Treeview(new_win, columns=columns, show="headings", height=15)
+        tree.heading("שעה", text="שעה")
+        tree.heading("שיעור", text="מקצוע / שיעור")
+        tree.column("שעה", width=80, anchor="center")
+        tree.column("שיעור", width=200, anchor="center")
+        tree.pack(pady=10, padx=20)
+
+        def fetch_schedule(event=None):
+            for item in tree.get_children():
+                tree.delete(item)
+
+            selected_class = class_cb.get()
+            selected_day = day_cb.get()
+
+            SERVER_IP = '127.0.0.1'
+            PORT = 9999
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                        s.connect((SERVER_IP, PORT))
+                        s.sendall(f"get_schedule|{selected_class}".encode('utf-8'))
+                        
+                        raw_data = s.recv(16384).decode('utf-8') 
+                        
+                        if raw_data.startswith("error"):
+                            tree.insert("", "end", values=("-", "הכיתה לא קיימת במערכת"))
+                            return
+
+                        schedule_data = json.loads(raw_data) 
+
+                        day_lessons = schedule_data.get(selected_day, [])
+                        
+                        if not day_lessons:
+                            tree.insert("", "end", values=("-", "אין לימודים / חסר מידע"))
+                            return
+
+                        for item in day_lessons:
+                            if " - " in item:
+                                time_part, subject_part = item.split(" - ", 1)
+                            else:
+                                time_part = "-"
+                                subject_part = item
+                                
+                            tree.insert("", "end", values=(time_part, subject_part))
+                            
+            except json.JSONDecodeError:
+                messagebox.showerror("שגיאה", "התקבל פורמט נתונים לא תקין מהשרת")
+            except Exception as e:
+                messagebox.showerror("שגיאה", f"לא ניתן לטעון מערכת: {e}")
+
+        class_cb.bind("<<ComboboxSelected>>", fetch_schedule)
+        day_cb.bind("<<ComboboxSelected>>", fetch_schedule)
+
+        fetch_schedule()
 
     if __name__ == "__main__":
         open_splash_screen()

@@ -2,7 +2,6 @@
 
 import tkinter as tk
 from tkinter import messagebox
-import login as l 
 import time
 from tkinter import ttk
 
@@ -373,6 +372,13 @@ tk.Button(root,
           fg="blue", 
           bd=0,
           cursor="hand2",).pack()
+
+tk.Button(root,
+          text="הרשמה למערכת",
+          font=6,
+          fg="blue",
+          bd=0,
+          cursor="hand2").pack()
 
 tk.Label(root, 
          text="בכך שאתה מכניס את שם המשתמש והסיסמה שלך\n אתה בעצם מסכים עם כל ה\n", 
