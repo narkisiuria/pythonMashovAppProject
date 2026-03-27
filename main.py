@@ -7,6 +7,7 @@ try:
     from tkinter import ttk
     import json
     import os
+    import webbrowser
 
     print("reciving dataFromServer...")
     print("loading app...")
@@ -343,6 +344,8 @@ try:
         except Exception as e:
             messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
 
+    def signUp():
+        pass
 
     ###########################################################
     #                      עמוד פתיחה                  #
@@ -352,10 +355,10 @@ try:
         messagebox.showinfo(title="?שכחת את הסיסמה", message="שנה את סיסמתך במשרד המזכירות בבית הספר")
 
 
-    def p_p():
-        messagebox.showinfo(title="מדיניות והפרטיות", message="קיצר, אנחנו מחליטים על בערך הכל")
+    def openPrivecyPolicy():
+        webbrowser.open("privacy_policy.txt" )
  
-
+ 
     root = tk.Tk()
     root.title("Mashov App/Login")       
     width = 400
@@ -407,7 +410,8 @@ try:
               font=6,
               fg="blue",
               bd=0,
-              cursor="hand2",).pack(pady=0)
+              cursor="hand2",
+              command=signUp).pack(pady=0)
     
     tk.Label(root, 
             text="בכך שאתה מכניס את שם המשתמש והסיסמה שלך\n אתה בעצם מסכים עם כל ה\n", 
@@ -416,7 +420,7 @@ try:
     tk.Button(root, 
             text="המדיניות והפרטיות שלנו", 
             font=5, 
-            command=p_p,
+            command=openPrivecyPolicy,
             fg="blue", 
             bd=0,
             cursor="hand2",).pack()
@@ -986,7 +990,7 @@ try:
                                 s.connect((SERVER_IP, PORT))                                
                                 print("Connected! Waiting for server response...")
                                 subject = "freer premition"
-                                s.sendall(subject.encode('utf-8'))
+                                s.sendall(subject.encode('utf-8'))     
 
                                 while True:
                                         raw_data = s.recv(1024)
@@ -1017,7 +1021,7 @@ try:
                 text="חזרה למסך ראשי",
                 command=lambda: open_main_page(current_username),
                 cursor="hand2",).place(x=10, y=10)
-
+ 
         tk.Label(new_win,
                 text="טופס בקשת שחרור",
                 font="Arial 20 bold",
@@ -1098,6 +1102,7 @@ try:
 
         tk.Button(new_win,
                   text="חזרה",
+                  cursor="hand2",
                   command=lambda:
                       open_main_page(current_username)).pack(anchor="nw",padx=10, pady=10)
         
