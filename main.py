@@ -8,6 +8,11 @@ try:
     import json
     import os
     import webbrowser
+    
+    root = tk.Tk()
+    root.withdraw() # מחביא את החלון הראשי כדי שנוכל להשתמש ב-Toplevel
+    entry_username = None
+    entry_password = None
 
     print("reciving dataFromServer...")
     print("loading app...")
@@ -345,7 +350,150 @@ try:
             messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
 
     def signUp():
-        pass
+        new_win = tk.Toplevel()
+        new_win.title("MashovApp / הרשמה")
+        destroy_and_set_new_window(new_win)
+        
+        width = 450
+        height = 650
+        
+        screen_width = new_win.winfo_screenwidth()
+        screen_height = new_win.winfo_screenheight()
+        
+        x = (screen_width // 2) - (width // 2)
+        y = (screen_height // 2) - (height // 2)
+        
+        new_win.geometry(f"{width}x{height}+{x}+{y}")
+        new_win.configure(bg="#f0f4f8")
+        new_win.resizable(False, False)
+        
+        main_frame = tk.Frame(new_win, bg="white", bd=0)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=380, height=600)
+        
+        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=80)
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)
+        
+        tk.Label(header_frame,
+                text="📝 הרשמה למערכת",
+                fg="white",
+                bg="#1a73e8",
+                font=("Arial", 20,
+                      "bold")).pack(expand=True)
+        
+        form_frame = tk.Frame(main_frame, bg="white")
+        form_frame.pack(fill="both",
+                        expand=True,
+                        padx=30, pady=20)
+        
+        label_font = ("Arial", 11)
+        entry_font = ("Arial", 13)
+        label_color = "#333333"
+        
+        tk.Label(form_frame,
+                 text="שם פרטי",
+                 font=label_font,
+                 fg=label_color,
+                 bg="white",
+                 anchor="e").pack(fill="x",
+                                  pady=(10, 2))
+        firstName = tk.Entry(form_frame,
+                             width=30,
+                             font=entry_font,
+                             bg="#f8f9fa",
+                             relief="solid",
+                             bd=1,
+                             justify="right")
+        firstName.pack(fill="x",
+                       ipady=8)
+        
+        tk.Label(form_frame,
+                 text="שם משפחה",
+                 font=label_font,
+                 fg=label_color,
+                 bg="white",
+                 anchor="e").pack(fill="x",
+                                  pady=(15, 2))
+        lastName = tk.Entry(form_frame,
+                            width=30,
+                            font=entry_font,
+                            bg="#f8f9fa",
+                            relief="solid",
+                            bd=1,
+                            justify="right")
+        lastName.pack(fill="x",
+                      ipady=8)
+        
+        tk.Label(form_frame,
+                 text="אימייל",
+                 font=label_font,
+                 fg=label_color,
+                 bg="white",
+                 anchor="e").pack(fill="x",
+                                  pady=(15, 2))
+        gmail = tk.Entry(form_frame,
+                            width=30,
+                            font=entry_font,
+                            bg="#f8f9fa",
+                            relief="solid",
+                            bd=1,
+                            justify="right")
+        gmail.pack(fill="x",
+                      ipady=8)
+        
+        tk.Label(form_frame,
+                 text="שם משתמש חדש",
+                 font=label_font,
+                 fg=label_color,
+                 bg="white",
+                 anchor="e").pack(fill="x",
+                                  pady=(15, 2))
+        uaername = tk.Entry(form_frame,
+                         width=30,
+                         font=entry_font,
+                         bg="#f8f9fa",
+                         relief="solid",
+                         bd=1,
+                         justify="right")
+        uaername.pack(fill="x",
+                   ipady=8)
+        
+        tk.Label(form_frame,
+                 text="סיסמה חדשה",
+                 font=label_font,
+                 fg=label_color,
+                 bg="white",
+                 anchor="e").pack(fill="x",
+                                  pady=(15, 2))
+        password = tk.Entry(form_frame,
+                            width=30,
+                            font=entry_font,
+                            bg="#f8f9fa",
+                            relief="solid",
+                            bd=1,
+                            show="●",
+                            justify="right")
+        password.pack(fill="x",
+                      ipady=8)
+        
+        sign_up_btn = tk.Button(
+            form_frame,
+            text="יצירה",
+            font=("Arial", 14, "bold"),
+            fg="white",
+            bg="#1a73e8",
+            activebackground="#1557b0",
+            activeforeground="white",
+            relief="flat",
+            cursor="hand2",
+            bd=0,
+        )
+        
+        sign_up_btn.pack(fill="x",
+                         pady=(30, 10),
+                         ipady=12)
+
+        
 
     ###########################################################
     #                      עמוד פתיחה                  #
@@ -357,79 +505,157 @@ try:
 
     def openPrivecyPolicy():
         webbrowser.open("privacy_policy.txt" )
- 
- 
-    root = tk.Tk()
-    root.title("Mashov App/Login")       
-    width = 400
-    height = 620
-                
-    screen_width = root.winfo_screenwidth()
-    screen_height = root.winfo_screenheight()
-                
-    x = (screen_width // 2) - (width // 2)
-    y = (screen_height // 2) - (height // 2)
-                
-    root.geometry(f"{width}x{height}+{x}+{y}")
-    root.withdraw()
+        
+    def open_login_window():
+        global entry_username, entry_password, root, splash_root
+        
+        if splash_root: 
+            splash_root.destroy()
+            
+        login_win = tk.Toplevel(root)
+        login_win.title("משוב / התחברות")
+        
+        destroy_and_set_new_window(login_win)
 
+        width, height = 520, 770 
+        x = (login_win.winfo_screenwidth() // 2) - (width // 2)
+        y = (login_win.winfo_screenheight() // 2) - (height // 2)
+        login_win.geometry(f"{width}x{height}+{x}+{y}")
+        login_win.configure(bg="#f0f4f8")
+        login_win.resizable(False, False)
 
-    tk.Label(root, 
-            text="ברוך הבא לאפליקצית המשוב\n כדי להתחיל\n בבקשה תכניס את שם המשתמש והסיסמה שלך ", 
-            font="Arial 14 bold", 
-            fg="blue").pack(side="top", pady=(50,0))
+        main_frame = tk.Frame(login_win,
+                              bg="white",
+                              bd=0)
+        main_frame.place(relx=0.5,
+                         rely=0.5,
+                         anchor="center",
+                         width=480, height=720)
 
-    tk.Label(root, text="שם משתמש", fg="blue", font="Arial 14",).pack(pady=(40, 10))
-    entry_username = tk.Entry(root, width=25, bg="white")
-    entry_username.pack()
+        header_frame = tk.Frame(main_frame,
+                                bg="#1a73e8",
+                                height=160)
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)
 
-    tk.Label(root, text="סיסמה", font="Arial 14", fg="blue").pack(pady=(10,0))
-    entry_password = tk.Entry(root, width=25, bg="white", show="*")
-    entry_password.pack(pady=7)
+        tk.Label(header_frame,
+                 text="🔒",
+                 font=("Arial", 45),
+                 fg="white",
+                 bg="#1a73e8").pack(pady=(25, 0))
+        tk.Label(header_frame,
+                 text="משוב - מערכת עדכונים",
+                 font=("Arial",
+                       28,
+                       "bold"),
+                 fg="white",
+                 bg="#1a73e8").pack()
 
-    tk.Button(root,
-            text="התחברות", 
-            font=14, 
-            command=attempt_login,
-            bg="royalblue", 
-            fg="white", 
-            bd=0, 
-            width=20,
-            cursor="hand2",).pack(pady=20)
+        form_frame = tk.Frame(main_frame,
+                              bg="white")
+        form_frame.pack(fill="both",
+                        expand=True,
+                        padx=45,
+                        pady=25)
 
-    tk.Button(root, 
-            text="?שכחת את הסיסמה", 
-            font=5, 
-            command=forgotPass,
-            fg="blue", 
-            bd=0,
-            cursor="hand2",).pack()
-    
-    tk.Button(root,
-              text="הרשמה למערכת",
-              font=6,
-              fg="blue",
-              bd=0,
-              cursor="hand2",
-              command=signUp).pack(pady=0)
-    
-    tk.Label(root, 
-            text="בכך שאתה מכניס את שם המשתמש והסיסמה שלך\n אתה בעצם מסכים עם כל ה\n", 
-            font="Arial 11 bold",).pack(pady=(10,0))
+        tk.Label(form_frame,
+                 text="שם משתמש",
+                 font=("Arial", 12, "bold"),
+                 fg="#333333",
+                 bg="white",
+                 anchor="e").pack(fill="x",
+                                  pady=(10, 5))
+        entry_username = tk.Entry(form_frame,
+                                  font=("Arial", 16),
+                                  bg="#f8f9fa",
+                                  relief="solid",
+                                  bd=1,
+                                  justify="right")
+        entry_username.pack(fill="x",
+                            ipady=12)
 
-    tk.Button(root, 
-            text="המדיניות והפרטיות שלנו", 
-            font=5, 
-            command=openPrivecyPolicy,
-            fg="blue", 
-            bd=0,
-            cursor="hand2",).pack()
-    
-    tk.Label(root,
-             text="📖",
-             font=("Arial", 60)).pack()
+        tk.Label(form_frame,
+                 text="סיסמה",
+                 font=("Arial", 12, "bold"),
+                 fg="#333333",
+                 bg="white",
+                 anchor="e").pack(fill="x", pady=(20, 5))
+        entry_password = tk.Entry(form_frame,
+                                  font=("Arial", 16),
+                                  bg="#f8f9fa",
+                                  relief="solid",
+                                  bd=1,
+                                  show="●",
+                                  justify="right")
+        entry_password.pack(fill="x",
+                            ipady=12)
 
+        tk.Button(
+            form_frame,
+            text="התחברות למערכת",
+            font=("Arial",
+                  16, "bold"), fg="white", bg="#1a73e8",
+            activebackground="#1557b0",
+            relief="flat",
+            cursor="hand2",
+            command=attempt_login
+        ).pack(fill="x",
+               pady=(45, 15),
+               ipady=15)
 
+        nav_frame = tk.Frame(form_frame, bg="white")
+        nav_frame.pack(pady=10)
+        
+        tk.Button(nav_frame, 
+                  text="שכחת סיסמה",
+                  font=("Arial", 14,
+                        "bold"),
+                  fg="#1a73e8",
+                  bg="white",
+                  bd=0,
+                  cursor="hand2", 
+                command=forgotPass).pack(side="right", padx=10)
+        
+        tk.Label(nav_frame,
+                 text="|",
+                 fg="#040404",
+                 bg="white",
+                 font=("Arial", 11)).pack(side="right")
+        
+        tk.Button(nav_frame,
+                  text="יצירת חשבון חדש",
+                  font=("Arial",
+                        14, "bold"),
+                  fg="#1a73e8",
+                  bg="white",
+                  bd=0,
+                  cursor="hand2", 
+                command=signUp).pack(side="right", padx=10)
+
+        footer_frame = tk.Frame(main_frame,
+                                bg="white")
+        footer_frame.pack(side="bottom",
+                          pady=2) 
+        
+        tk.Label(footer_frame,
+                 text="בכניסה למערכת הנך מסכים לכל", 
+                 font=("Arial", 11),
+                 fg="#999999",
+                 bg="white").pack()
+        
+        tk.Button(footer_frame,
+                  text="תנאי השימוש ומדיניות הפרטיות שלנו", 
+                  font=("Arial", 11, "underline"),
+                  fg="#1a73e8", bg="white", 
+                  bd=0,
+                  cursor="hand2", 
+                  command=lambda: webbrowser.open("https://www.mashov.info/privacypolicy/")).pack(pady=(0, 15))
+
+        tk.Label(footer_frame,
+                 text="📖",
+                 fg="#1a73e8",
+                 bg="white", 
+                 font=("Arial", 50)).pack()
 
     ###########################################################
     #                שערי האפליקציה        #
@@ -761,50 +987,7 @@ try:
                                 keep_an_eye1.insert(0, entery_notice)
                                 
                                 keep_an_eye1.config(state="readonly")
-
-                                # tk.Label(new_win, 
-                                #         text="בלחיצה על כפתור שמירת הטופס אני מאפשר\n גישה מלאה לקבצים שלי",
-                                #         font="Arial 11 bold", 
-                                #         fg="blue").place(x=60, y=500) 
-                                        
-                                # tk.Button(new_win,
-                                #         text="שמירת הטופס",
-                                #         font="Arial 10 bold",
-                                #         bg="blue",
-                                #         fg="ghostwhite",
-                                #         bd=0,
-                                #         width=11,
-                                #         height=2,
-                                #         activebackground="lightblue",
-                                #         command=reminder_completed,
-                                #         cursor="hand2",).place(x=13, y=560)
                                 
-                                # tk.Button(new_win,
-                                #         text="ניקוי הקיים",
-                                #         font="Arial 10 bold",
-                                #         bg="blue",
-                                #         fg="ghostwhite",
-                                #         bd=0,
-                                #         width=11,
-                                #         height=2,
-                                #         activebackground="lightblue",
-                                #         command=delete_existing,
-                                #         cursor="hand2",).place(x=145, y=560)
-
-                                # tk.Button(new_win,
-                                #         text="ראיית הקיים",
-                                #         font="Arial 10 bold",
-                                #         bg="blue",
-                                #         fg="ghostwhite",
-                                #         bd=0,
-                                #         width=11,
-                                #         height=2,
-                                #         activebackground="lightblue",
-                                #         command=see_existing,
-                                #         cursor="hand2",).place(x=280, y=560)
-                                
-                        ######################################################################
-
                         else:
                                 messagebox.showerror("שגיאה", "לא נמצא תזכורון קיים")
                                 break
