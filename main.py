@@ -8,6 +8,7 @@ try:
     import json
     import os
     import webbrowser
+    import random
     
     root = tk.Tk()
     root.withdraw() # מחביא את החלון הראשי כדי שנוכל להשתמש ב-Toplevel
@@ -27,7 +28,7 @@ try:
         if current_toplevel_win is not None and current_toplevel_win.winfo_exists():
             current_toplevel_win.destroy()
         current_toplevel_win = new_win
-
+        
 
     ###########################################################
     #               מסך פתיחה                  #
@@ -37,78 +38,137 @@ try:
         global splash_root
         splash_root = tk.Tk()
         splash_root.overrideredirect(True)
-        splash_root.geometry("420x580")
-
-        TEXT_MAIN = "white" 
-        TEXT_SUB = "#e0e0e0"
-        BTN_BG = "#ffffff"
-        BTN_FG = "#4a00e0"
-
-        canvas = tk.Canvas(splash_root, width=420, height=580, highlightthickness=0, bd=0)
-        canvas.pack(fill="both", expand=True)
-
-        for i in range(580):
-            r = int(74 + (142 - 74) * (i / 580))
-            g = int(0 + (45 - 0) * (i / 580))
-            b = int(224 + (226 - 224) * (i / 580))
-            color = f"#{r:02x}{g:02x}{b:02x}"
-            canvas.create_line(0, i, 420, i, fill=color)
-
-        canvas.create_text(210, 110, text="משוב", fill=TEXT_MAIN, font=("Arial", 46, "bold"))
-        canvas.create_text(210, 170, text="ניהול לימודים חכם • פשוט • מהיר", fill=TEXT_SUB, font=("Arial", 16))
-        canvas.create_text(210, 285, text="📊", font=("Arial", 97))
-
-        def create_button():
-            btn = tk.Button(
-                splash_root,
-                text="התחבר עכשיו",
-                font=("Arial", 18, "bold"),
-                bg=BTN_BG,
-                fg=BTN_FG,
-                bd=0,
-                relief="flat",
-                width=14,
-                cursor="hand2",
-                command=open_login_window
-            )
-
-            tk.Button(
-                splash_root,
-                text="הצצה מהירה",
-                font=("Arial", 16, "bold"),
-                bg=BTN_BG,
-                fg=BTN_FG,
-                bd=0,
-                relief="flat",
-                width=10,
-                cursor="hand2",
-                command=open_peak).place(x=142, y=446)
-            
-            canvas.create_window(210, 400, window=btn)
-
-        create_button()
-
-        canvas.create_text(210, 540,
-                        text="© 2025 Mashov - כל הזכויות שמורות",
-                        fill="#eeeeee",
-                        font=("Arial", 10))
-
-        canvas.create_text(210, 510,
-                        text="© מפתח האפליקציה - אוריה נרקיסי",
-                        fill="#eeeeee",
-                        font=("Arial", 10))
         
-        # למרכז המסך
+        width, height = 520, 770 
+        splash_root.geometry(f"{width}x{height}")
+        splash_root.configure(bg="#f0f4f8") 
+
+        main_frame = tk.Frame(splash_root,
+                              bg="white", bd=0)
+        
+        main_frame.place(relx=0.5,
+                         rely=0.5,
+                         anchor="center",
+                         width=520,
+                         height=770)
+
+        header_frame = tk.Frame(main_frame,
+                                bg="#1a73e8",
+                                height=220)
+        
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)
+
+        tk.Label(header_frame, text="📊",
+                 font=("Arial", 55), 
+                 fg="white",
+                 bg="#1a73e8").pack(pady=(40, 0))
+        
+        tk.Label(header_frame,
+                 text="מערכת משוב",
+                 font=("Arial",
+                       36,
+                       "bold"),
+                 fg="white",
+                 bg="#1a73e8").pack()
+        
+        tk.Label(header_frame,
+                 text="הדרך החכמה לנהל את הלימודים",
+                 font=("Arial", 12),
+                 fg="#bbdefb",
+                 bg="#1a73e8").pack()
+
+        content_frame = tk.Frame(main_frame,
+                                 bg="white")
+        
+        content_frame.pack(fill="both",
+                           expand=True, padx=50)
+
+        tk.Label(content_frame,
+                 text="ברוכים הבאים",
+                 font=("Arial",
+                       22,
+                       "bold"),
+                 fg="#202124",
+                 bg="white").pack(pady=(40, 10))
+        
+        features_frame = tk.Frame(content_frame,
+                                  bg="white")
+        
+        features_frame.pack(pady=30)
+
+        features = [("🕒", 
+                     "לו\"ז בזמן אמת"),
+                    ("📝", "מעקב ציונים"),
+                    ("✅", "ניהול משימות")]
+        
+        for icon, txt in features:
+            f_row = tk.Frame(features_frame, bg="white")
+            f_row.pack(side="left", padx=15)
+            tk.Label(f_row, text=icon,
+                     font=("Arial", 20),
+                     bg="white").pack()
+            
+            tk.Label(f_row,
+                     text=txt,
+                     font=("Arial", 10, "bold"),
+                     fg="#5f6368",
+                     bg="white").pack()
+
+        btn_frame = tk.Frame(content_frame, bg="white")
+        btn_frame.pack(fill="x", pady=20)
+
+        login_btn = tk.Button(
+            btn_frame,
+            text="כניסה למערכת",
+            font=("Arial", 16, "bold"),
+            bg="#1a73e8",
+            fg="white",
+            relief="flat",
+            cursor="hand2",
+            command=open_login_window
+        )
+        login_btn.pack(fill="x", ipady=15, pady=(0, 15))
+
+        peak_btn = tk.Button(
+            btn_frame,
+            text="צפייה ללא התחברות",
+            font=("Arial", 14),
+            bg="white",
+            fg="#1a73e8",
+            highlightthickness=2,
+            highlightbackground="#1a73e8",
+            relief="flat",
+            cursor="hand2",
+            command=open_peak
+        )
+        peak_btn.pack(fill="x", ipady=12)
+
+        footer_frame = tk.Frame(main_frame,
+                                bg="#f8f9fa",
+                                height=80)
+        
+        footer_frame.pack(side="bottom",
+                          fill="x")
+        
+        footer_frame.pack_propagate(False)
+
+        tk.Label(
+            footer_frame, 
+            text="פותח ע\"י אוריה נרקיסי • גרסה 1.0", 
+            fg="#70757a", 
+            bg="#f8f9fa", 
+            font=("Arial", 10)
+        ).pack(expand=True)
+
         splash_root.update_idletasks()
         w = splash_root.winfo_screenwidth()
         h = splash_root.winfo_screenheight()
-        size = tuple(int(_) for _ in splash_root.geometry().split('+')[0].split('x'))
-        x = (w/2) - (size[0]/2)
-        y = (h/2) - (size[1]/2)
-        splash_root.geometry(f"{size[0]}x{size[1]}+{int(x)}+{int(y)}")
+        x = (w/2) - (width/2)
+        y = (h/2) - (height/2)
+        splash_root.geometry(f"{width}x{height}+{int(x)}+{int(y)}")
 
         splash_root.mainloop()
-
     ###########################################################
     #                   מסך לוגין                   #
     ###########################################################
@@ -307,198 +367,6 @@ try:
     #                   פונקציית התחברות           #
     ###########################################################
 
-    def attempt_login():
-        typedUSERNAME = entry_username.get()
-        typedPASSWORD = entry_password.get()
-        
-        SERVER_IP = '127.0.0.1' 
-        PORT = 9999
-        
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(5)
-                print(f"Connecting to {SERVER_IP}:{PORT}...")
-                s.connect((SERVER_IP, PORT))                                
-                
-                subject = f"login|{typedUSERNAME}|{typedPASSWORD}"
-                s.sendall(subject.encode('utf-8'))
-                
-                raw_data = s.recv(1024)
-                if not raw_data:
-                    print("No response from server")
-                    return
-
-                dataFromServer = raw_data.decode('utf-8').strip()
-                print(f"Received from server: {dataFromServer}")
-
-                if dataFromServer == "200 ok":
-                    print("success!")
-                    root.withdraw() 
-                    open_main_page(typedUSERNAME)
-                
-                elif dataFromServer == "attempt limit reached":
-                        messagebox.showerror("שגיאה", "יותר מידי ניסיונות, במידה ושכחת את הסיסמה שלך אז לחץ על שכחת את הסיסמה")
-                        exit
-                
-                else:
-                    messagebox.showerror("שגיאה", "שם משתמש או סיסמה שגויים")
-                    print("unsuccessful")
-
-        except ConnectionRefusedError:
-            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
-        except Exception as e:
-            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
-
-    def signUp():
-        new_win = tk.Toplevel()
-        new_win.title("MashovApp / הרשמה")
-        destroy_and_set_new_window(new_win)
-        
-        width = 450
-        height = 650
-        
-        screen_width = new_win.winfo_screenwidth()
-        screen_height = new_win.winfo_screenheight()
-        
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-        
-        new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
-        
-        main_frame = tk.Frame(new_win, bg="white", bd=0)
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=380, height=600)
-        
-        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=80)
-        header_frame.pack(fill="x")
-        header_frame.pack_propagate(False)
-        
-        tk.Label(header_frame,
-                text="📝 הרשמה למערכת",
-                fg="white",
-                bg="#1a73e8",
-                font=("Arial", 20,
-                      "bold")).pack(expand=True)
-        
-        form_frame = tk.Frame(main_frame, bg="white")
-        form_frame.pack(fill="both",
-                        expand=True,
-                        padx=30, pady=20)
-        
-        label_font = ("Arial", 11)
-        entry_font = ("Arial", 13)
-        label_color = "#333333"
-        
-        tk.Label(form_frame,
-                 text="שם פרטי",
-                 font=label_font,
-                 fg=label_color,
-                 bg="white",
-                 anchor="e").pack(fill="x",
-                                  pady=(10, 2))
-        firstName = tk.Entry(form_frame,
-                             width=30,
-                             font=entry_font,
-                             bg="#f8f9fa",
-                             relief="solid",
-                             bd=1,
-                             justify="right")
-        firstName.pack(fill="x",
-                       ipady=8)
-        
-        tk.Label(form_frame,
-                 text="שם משפחה",
-                 font=label_font,
-                 fg=label_color,
-                 bg="white",
-                 anchor="e").pack(fill="x",
-                                  pady=(15, 2))
-        lastName = tk.Entry(form_frame,
-                            width=30,
-                            font=entry_font,
-                            bg="#f8f9fa",
-                            relief="solid",
-                            bd=1,
-                            justify="right")
-        lastName.pack(fill="x",
-                      ipady=8)
-        
-        tk.Label(form_frame,
-                 text="אימייל",
-                 font=label_font,
-                 fg=label_color,
-                 bg="white",
-                 anchor="e").pack(fill="x",
-                                  pady=(15, 2))
-        gmail = tk.Entry(form_frame,
-                            width=30,
-                            font=entry_font,
-                            bg="#f8f9fa",
-                            relief="solid",
-                            bd=1,
-                            justify="right")
-        gmail.pack(fill="x",
-                      ipady=8)
-        
-        tk.Label(form_frame,
-                 text="שם משתמש חדש",
-                 font=label_font,
-                 fg=label_color,
-                 bg="white",
-                 anchor="e").pack(fill="x",
-                                  pady=(15, 2))
-        uaername = tk.Entry(form_frame,
-                         width=30,
-                         font=entry_font,
-                         bg="#f8f9fa",
-                         relief="solid",
-                         bd=1,
-                         justify="right")
-        uaername.pack(fill="x",
-                   ipady=8)
-        
-        tk.Label(form_frame,
-                 text="סיסמה חדשה",
-                 font=label_font,
-                 fg=label_color,
-                 bg="white",
-                 anchor="e").pack(fill="x",
-                                  pady=(15, 2))
-        password = tk.Entry(form_frame,
-                            width=30,
-                            font=entry_font,
-                            bg="#f8f9fa",
-                            relief="solid",
-                            bd=1,
-                            show="●",
-                            justify="right")
-        password.pack(fill="x",
-                      ipady=8)
-        
-        sign_up_btn = tk.Button(
-            form_frame,
-            text="יצירה",
-            font=("Arial", 14, "bold"),
-            fg="white",
-            bg="#1a73e8",
-            activebackground="#1557b0",
-            activeforeground="white",
-            relief="flat",
-            cursor="hand2",
-            bd=0,
-        )
-        
-        sign_up_btn.pack(fill="x",
-                         pady=(30, 10),
-                         ipady=12)
-
-        
-
-    ###########################################################
-    #                      עמוד פתיחה                  #
-    ###########################################################
-
     def forgotPass():
         messagebox.showinfo(title="?שכחת את הסיסמה", message="שנה את סיסמתך במשרד המזכירות בבית הספר")
 
@@ -530,7 +398,7 @@ try:
         main_frame.place(relx=0.5,
                          rely=0.5,
                          anchor="center",
-                         width=480, height=720)
+                         width=520, height=755)
 
         header_frame = tk.Frame(main_frame,
                                 bg="#1a73e8",
@@ -655,11 +523,186 @@ try:
                  text="📖",
                  fg="#1a73e8",
                  bg="white", 
-                 font=("Arial", 50)).pack()
+                 font=("Arial", 50)).pack()    
+        
+        return login_win
+ 
+    def attempt_login():
+        typedUSERNAME = entry_username.get()
+        typedPASSWORD = entry_password.get()
+        
+        SERVER_IP = '127.0.0.1' 
+        PORT = 9999
+        
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(5)
+                print(f"Connecting to {SERVER_IP}:{PORT}...")
+                s.connect((SERVER_IP, PORT))                                
+                
+                subject = f"login|{typedUSERNAME}|{typedPASSWORD}"
+                s.sendall(subject.encode('utf-8'))
+                
+                raw_data = s.recv(1024)
+                if not raw_data:
+                    print("No response from server")
+                    return
+
+                dataFromServer = raw_data.decode('utf-8').strip()
+                print(f"Received from server: {dataFromServer}")
+
+                if dataFromServer == "200 ok":
+                    print("success!")
+                    root.withdraw() 
+                    open_main_page(typedUSERNAME)
+                
+                elif dataFromServer == "attempt limit reached":
+                        messagebox.showerror("שגיאה", "יותר מידי ניסיונות, במידה ושכחת את הסיסמה שלך אז לחץ על שכחת את הסיסמה")
+                        exit
+                
+                else:
+                    messagebox.showerror("שגיאה", "שם משתמש או סיסמה שגויים")
+                    print("unsuccessful")
+
+        except ConnectionRefusedError:
+            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+        except Exception as e:
+            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+    
+    def signUp():
+        def attemptSignUp():
+            all_entries = [firstName, lastName, gmail, newUsername, newPassword]
+            if any(entry.get().strip() == "" for entry in all_entries):
+                messagebox.showerror("שגיאה", "נא למלא את כל השדות")
+                return
+            
+            if "@" not in str(gmail.get()):
+                messagebox.showerror("שגיאה", "אימייל לא תקין")
+                return
+            
+            elif gmail.get().startswith("@") or gmail.get().endswith("@"):
+                messagebox.showerror("שגיאה", "אימייל לא תקין")     
+                return 
+            
+            if firstName.get().isdigit() or lastName.get().isdigit():
+                messagebox.showerror("שגיאה", "שם לא יכול להיות מספר")
+                return
+                
+            SERVER_IP = '127.0.0.1' 
+            PORT = 9999
+            
+            try:
+                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                    s.settimeout(5)
+                    print(f"Connecting to {SERVER_IP}:{PORT}...")
+                    s.connect((SERVER_IP, PORT))                                
+                    
+                    subject = f"signUp|{firstName.get()}|{lastName.get()}|{gmail.get()}|{newUsername.get()}|{newPassword.get()}"
+                    s.sendall(subject.encode('utf-8'))
+                    
+                    raw_data = s.recv(1024)
+                    if not raw_data:
+                        print("No response from server")
+                        return
+
+                    dataFromServer = raw_data.decode('utf-8').strip()
+                    print(f"Received from server: {dataFromServer}")
+
+                    if dataFromServer == "200 ok":
+                        print("success!")
+                        messagebox.showinfo("הצלחה", "חשבון נותר בהצלחה סגור את החלון ותתחבר")
+                        return
+                    
+                    elif dataFromServer == "400 bad request":
+                        print("bad request sent to server")
+                        return
+                    
+                    elif dataFromServer == "gmail already exists":
+                        print("email is already in use")
+                        messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
+                        return
+
+                    elif dataFromServer == "username already exists":
+                        print("username already exists")
+                        messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
+                        return
+
+            except ConnectionRefusedError:
+                messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+            except Exception as e:
+                messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
+    
+            
+            
+        new_win = tk.Toplevel(root)
+        new_win.title("MashovApp / הרשמה")
+        
+        width, height = 520, 770
+        x = (new_win.winfo_screenwidth() // 2) - (width // 2)
+        y = (new_win.winfo_screenheight() // 2) - (height // 2)
+        new_win.geometry(f"{width}x{height}+{x}+{y}")
+        new_win.configure(bg="#f0f4f8")
+        new_win.resizable(False, False)
+        
+        main_frame = tk.Frame(new_win, bg="white", bd=0)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=520, height=755)
+
+        header_frame = tk.Frame(main_frame, bg="#1a73e8", height=160)
+        header_frame.pack(fill="x")
+        header_frame.pack_propagate(False)
+        
+        tk.Label(header_frame, text="📝", font=("Arial", 45), fg="white", bg="#1a73e8").pack(pady=(25, 0))
+        tk.Label(header_frame, text="יצירת חשבון חדש", font=("Arial", 24, "bold"), fg="white", bg="#1a73e8").pack()
+        
+        form_frame = tk.Frame(main_frame, bg="white")
+        form_frame.pack(fill="both", expand=True, padx=45, pady=10)
+        
+        label_style = {"font": ("Arial", 10, "bold"), "fg": "#333333", "bg": "white", "anchor": "e"}
+        entry_style = {"font": ("Arial", 12), "bg": "#f8f9fa", "relief": "solid", "bd": 1, "justify": "right"}
+
+        fields = [
+            ("שם פרטי", "firstName"),
+            ("שם משפחה", "lastName"),
+            ("אימייל", "gmail"),
+            ("שם משתמש", "newUsername"),
+            ("סיסמה", "newPassword")
+        ]
+        
+        entries = {}
+        for label_text, var_name in fields:
+            tk.Label(form_frame, text=label_text, **label_style).pack(fill="x", pady=(10, 2))
+            ent = tk.Entry(form_frame, **entry_style)
+            ent.pack(fill="x", ipady=6)
+            entries[var_name] = ent
+
+        firstName, lastName, gmail, newUsername, newPassword = entries.values()
+        
+        gmail.insert(0, "example@gmail.com")
+        
+        suggested = "".join([random.choice("123!@#%$%^&89*/") for _ in range(8)])
+        newPassword.insert(0, suggested)
+        
+        tk.Button(form_frame, text="צור חשבון עכשיו", font=("Arial", 16, "bold"), 
+                  fg="white", bg="#1a73e8", activebackground="#1557b0", 
+                  relief="flat", cursor="hand2", command=attemptSignUp).pack(fill="x", pady=(25, 10), ipady=12)
+
+        footer_frame = tk.Frame(main_frame, bg="white")
+        footer_frame.pack(side="bottom", pady=20)
+        
+        tk.Label(footer_frame, text="?כבר יש לך חשבון", font=("Arial", 11), fg="#999999", bg="white").pack()
+        tk.Button(footer_frame, text="חזור למסך ההתחברות", font=("Arial", 11, "underline", "bold"), 
+                  fg="#1a73e8", bg="white", bd=0, cursor="hand2", 
+                  command=new_win.destroy).pack()
+        
+        tk.Label(footer_frame, text="🏫", font=("Arial", 40), bg="white").pack(pady=10)
+
+        return new_win
+
 
     ###########################################################
     #                שערי האפליקציה        #
     ###########################################################
+    
 
     def open_grades():
         new_win = tk.Toplevel()

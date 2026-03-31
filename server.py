@@ -107,10 +107,54 @@ try:
                     except FileNotFoundError:
                         conn.sendall("error|file not found".encode('utf-8'))
                 
-                elif dataFromClient == "sign up":
-                    pass
+                elif dataFromClient.startswith("signUp|"):
+                    parts = dataFromClient.split("|")
+                    if len(parts) != 6:
+                        print(f"[+] sending '400 bad request' to client: {addr}")
+                        conn.sendall("400 bad request".encode('utf-8'))
+                        print(f"[+] sent.")
+                        return
 
-            except Exception as e:
+                    print("[+] analizing the data")
+                    firstName = parts[1]
+                    lastName = parts[2]
+                    gmail = parts[3]
+                    newUsername = parts[4]
+                    newPassword = parts[5]
+                    timeCreated = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    
+                    print("[+] opening users.json")
+                    with open("users.json", "r", encoding='utf-8') as f:
+                        users = json.load(f)
+                        
+                        for username, data in users.items():
+                            if data["gmail_account"] == gmail:
+                                print(f"[+] found email for user: {username}")
+                                conn.sendall("gmail already exists".encode('utf-8'))
+                                return
+
+                        if newUsername in users:
+                            print("[+] found that username is in use")
+                            conn.sendall("username already exists".encode('utf-8'))
+                            return
+                    
+                    users[newUsername] = {
+                        "id": len(users) + 1,
+                        "password": newPassword,
+                        "first_name": firstName,
+                        "last_name": lastName,
+                        "gmail_account": gmail,
+                        "created_at": timeCreated
+                    }
+                    
+                    with open("users.json", "w", encoding='utf-8') as f:
+                        print("[+] appending new user")
+                        json.dump(users, f, indent=4)
+                        print("[+] successfuly appended new user") 
+                    
+                        conn.sendall("200 ok".encode('utf-8'))            
+                    
+            except ValueError as e:
                 print(f"[+] Error handling client {addr}: {e}")
 
     def start_server():

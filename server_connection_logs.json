@@ -79,3 +79,7 @@
 {"time": "29/03/2026 00:32:35", "address": "('127.0.0.1', 16435)", "username": "yossi", "password": "password123", "status": "success"}
 {"time": "29/03/2026 00:39:36", "address": "('127.0.0.1', 37996)", "username": "admin", "password": "1234", "status": "success"}
 {"time": "29/03/2026 00:41:36", "address": "('127.0.0.1', 24177)", "username": "admin", "password": "1234", "status": "success"}
+{"time": "31/03/2026 17:09:10", "address": "('127.0.0.1', 17833)", "username": "admin", "password": "1234", "status": "failed"}
+{"time": "31/03/2026 17:49:07", "address": "('127.0.0.1', 44938)", "username": "ewfef", "password": "efwef", "status": "failed"}
+{"time": "31/03/2026 19:38:31", "address": "('127.0.0.1', 61567)", "username": "admin123", "password": "kp9wma5z", "status": "failed"}
+{"time": "01/04/2026 00:14:34", "address": "('127.0.0.1', 40898)", "username": "", "password": "", "status": "failed"}
