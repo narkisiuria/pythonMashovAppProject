@@ -1310,109 +1310,89 @@ try:
                 activebackground="lightblue",
                 command=freer_completed,
                 cursor="hand2",).place(x=13, y=560)
-
-    def open_marechet():
-        new_win = tk.Toplevel()
-        destroy_and_set_new_window(new_win)
-        new_win.title("מערכת שעות")
-        width = 400
-        height = 620
-                
-        screen_width = new_win.winfo_screenwidth()
-        screen_height = new_win.winfo_screenheight()
-                    
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-                    
-        new_win.geometry(f"{width}x{height}+{x}+{y}")
-
-        tk.Button(new_win,
-                  text="חזרה",
-                  cursor="hand2",
-                  command=lambda:
-                      open_main_page(current_username)).pack(anchor="nw",padx=10, pady=10)
         
-        tk.Label(new_win,
-                 text="מערכת שעות שבועית",
-                 font="Arial 18 bold",
-                 fg="blue").pack(pady=(0, 10))
+    def open_marechet():
+        sched_win = tk.Toplevel(root)
+        destroy_and_set_new_window(sched_win)
+        sched_win.title("מערכת שעות")
+        
+        width, height = 520, 770
+        screen_width = sched_win.winfo_screenwidth()
+        screen_height = sched_win.winfo_screenheight()
+        center_x = int(screen_width / 2 - width / 2)
+        center_y = int(screen_height / 2 - height / 2)
+        
+        sched_win.geometry(f"{width}x{height}+{center_x}+{center_y}")
+        sched_win.configure(bg="#f0f4f8")
+        
+        
+        tk.Button(sched_win, 
+            text="חזרה למסך ראשי",
+            command=lambda: open_main_page(current_username),
+            cursor="hand2",).place(x=10, y=10)
 
-        filter_frame = tk.Frame(new_win)
-        filter_frame.pack(pady=5)
+        style = ttk.Style()
+        style.theme_use("clam")
+        style.configure("Treeview", 
+                        background="white", 
+                        foreground="#333333", 
+                        rowheight=40, 
+                        fieldbackground="white", 
+                        font=("Helvetica", 12))
+        style.configure("Treeview.Heading", 
+                        background="#4a90e2", 
+                        foreground="white", 
+                        font=("Helvetica", 13, "bold"), 
+                        relief="flat")
+        
+        style.map("Treeview.Heading", background=[('active', '#357abd')])
 
-        tk.Label(filter_frame, text=":כיתה", font="Arial 12").grid(row=0, column=3, padx=5)
-        class_cb = ttk.Combobox(filter_frame, 
-                                values=["ט'1", "ט'2", "ט'3", "ט'4", "ט'5", "ט'6",], 
-                                width=5, 
-                                state="readonly", 
-                                justify="center",)
-        class_cb.set("ט'1") 
-        class_cb.grid(row=0, column=2, padx=5)
+        tk.Label(sched_win, text="מערכת שעות", font=("Helvetica", 32, "bold"), bg="#f0f4f8", fg="#4a90e2").pack(pady=(40, 20))
 
-        tk.Label(filter_frame, text=":יום", font="Arial 12").grid(row=0, column=1, padx=5)
-        day_cb = ttk.Combobox(filter_frame, 
-                              values=["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"], 
-                              width=8, 
-                              state="readonly", 
-                              justify="center",)
-        day_cb.set("ראשון") 
-        day_cb.grid(row=0, column=0, padx=5)
+        sel_frame = tk.Frame(sched_win, bg="#f0f4f8")
+        sel_frame.pack(fill="x", padx=45)
 
-        columns = ("שעה", "שיעור")
-        tree = ttk.Treeview(new_win, columns=columns, show="headings", height=15)
-        tree.heading("שעה", text="שעה")
-        tree.heading("שיעור", text="מקצוע / שיעור")
-        tree.column("שעה", width=80, anchor="center")
-        tree.column("שיעור", width=200, anchor="center")
-        tree.pack(pady=10, padx=20)
+        classes = ["ט'1", "ט'2", "ט'3", "ט'4", "ט'5", "ט'6",]
+        class_cb = ttk.Combobox(sel_frame, values=classes, state="readonly", font=("Helvetica", 12), width=8)
+        class_cb.set("ט'1")
+        class_cb.pack(side="right", padx=5)
+        tk.Label(sel_frame, text="כיתה:", bg="#f0f4f8", font=("Helvetica", 12, "bold"), fg="#555555").pack(side="right")
+
+        days = ["ראשון", "שני", "שלישי", "רביעי", "חמישי", "שישי"]
+        day_cb = ttk.Combobox(sel_frame, values=days, state="readonly", font=("Helvetica", 12), width=10)
+        day_cb.set("ראשון")
+        day_cb.pack(side="right", padx=5)
+        tk.Label(sel_frame, text="יום:", bg="#f0f4f8", font=("Helvetica", 12, "bold"), fg="#555555").pack(side="right")
+
+        tree_frame = tk.Frame(sched_win, bg="white", bd=0, highlightthickness=1, highlightbackground="#d1d9e0")
+        tree_frame.pack(fill="both", expand=True, padx=45, pady=20)
+
+        tree = ttk.Treeview(tree_frame, columns=("time", "subject"), show="headings", style="Treeview")
+        tree.heading("time", text="שעה")
+        tree.heading("subject", text="מקצוע")
+        tree.column("time", width=100, anchor="center")
+        tree.column("subject", width=250, anchor="center")
+        tree.pack(fill="both", expand=True)
 
         def fetch_schedule(event=None):
-            for item in tree.get_children():
-                tree.delete(item)
-
-            selected_class = class_cb.get()
-            selected_day = day_cb.get()
-
-            SERVER_IP = '127.0.0.1'
-            PORT = 9999
+            for row in tree.get_children():
+                tree.delete(row)
             try:
                 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                        s.connect((SERVER_IP, PORT))
-                        s.sendall(f"get_schedule|{selected_class}".encode('utf-8'))
-                        
-                        raw_data = s.recv(16384).decode('utf-8') 
-                        
-                        if raw_data.startswith("error"):
-                            tree.insert("", "end", values=("-", "הכיתה לא קיימת במערכת"))
-                            return
-
-                        schedule_data = json.loads(raw_data) 
-
-                        day_lessons = schedule_data.get(selected_day, [])
-                        
-                        if not day_lessons:
-                            tree.insert("", "end", values=("-", "אין לימודים / חסר מידע"))
-                            return
-
-                        for item in day_lessons:
-                            if " - " in item:
-                                time_part, subject_part = item.split(" - ", 1)
-                            else:
-                                time_part = "-"
-                                subject_part = item
-                                
-                            tree.insert("", "end", values=(time_part, subject_part))
-                            
-            except json.JSONDecodeError:
-                messagebox.showerror("שגיאה", "התקבל פורמט נתונים לא תקין מהשרת")
-            except Exception as e:
-                messagebox.showerror("שגיאה", f"לא ניתן לטעון מערכת: {e}")
+                    s.connect(("127.0.0.1", 9999))
+                    s.sendall(f"get_schedule|{class_cb.get()}".encode('utf-8'))
+                    raw = s.recv(4096).decode('utf-8')
+                    if not raw.startswith("error|"):
+                        data = json.loads(raw).get(day_cb.get(), [])
+                        for item in data:
+                            p = item.split(" - ", 1) if " - " in item else ["-", item]
+                            tree.insert("", "end", values=(p[0], p[1]))
+            except: pass
 
         class_cb.bind("<<ComboboxSelected>>", fetch_schedule)
         day_cb.bind("<<ComboboxSelected>>", fetch_schedule)
-
         fetch_schedule()
-
+    
     if __name__ == "__main__":
         open_splash_screen()
 

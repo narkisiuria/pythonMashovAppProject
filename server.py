@@ -60,15 +60,22 @@ try:
                     print("[+] loading users")
                     users = load_users()
                     print("[+] successfuly loaded users")
-                    if username in users and users[username] == password:
-                        print(f"[+] sending '200 ok' to client: {addr}")
-                        conn.sendall("200 ok".encode('utf-8'))
-                        print("[+] sent.")
-                        status = "success"
-
-                        with attempts_lock:
-                            failed_attempts_tracker[client_ip] = 0
-                            
+                    if username in users:
+                        userData = users[username]
+                        if userData["password"] == password:
+                            print(f"[+] sending '200 ok' to client: {addr}")
+                            conn.sendall("200 ok".encode('utf-8'))
+                            print("[+] sent.")
+                            status = "success"
+                            with attempts_lock:
+                                failed_attempts_tracker[client_ip] = 0
+                        
+                        else:
+                            print(f"[+] sending '401 unauthorized' to client: {addr}")
+                            conn.sendall("401 unauthorized".encode('utf-8'))
+                            print("[+] sent.")
+                            status = "failed"            
+                        
                     else:
                         print(f"[+] sending '401 unauthorized' to client: {addr}")
                         conn.sendall("401 unauthorized".encode('utf-8'))
