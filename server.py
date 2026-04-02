@@ -4,6 +4,7 @@ try:
     import json
     import datetime
     import threading
+    import hashingAlg
 
     HOST = '0.0.0.0'
     PORT = 9999
@@ -36,7 +37,11 @@ try:
                     return
                 
                 dataFromClient = rawDataFromClient.decode('utf-8').strip()
-                print(f"[+] subject recived: {dataFromClient} | ({addr})")
+                if dataFromClient.startswith("login|") or dataFromClient.startswith("signUp|"):
+                    print("[+] recived sensetive data. can not show info") 
+                
+                else:
+                    print(f"[+] subject recived: {dataFromClient} | ({addr})") 
 
                 if dataFromClient.startswith("login|"):
                     parts = dataFromClient.split("|")
@@ -47,7 +52,7 @@ try:
                         return
 
                     username = parts[1]
-                    password = parts[2]
+                    passwordFromClient = parts[2]
                     
                     with attempts_lock:
                         current_attempts = failed_attempts_tracker.get(client_ip, 0)
@@ -62,7 +67,12 @@ try:
                     print("[+] successfuly loaded users")
                     if username in users:
                         userData = users[username]
-                        if userData["password"] == password:
+                        storedPassword = userData["password"]
+                        salt_hex, stored_hash_hex = storedPassword.split(":")
+                        salt = bytes.fromhex(salt_hex)
+                        stored_hash = bytes.fromhex(stored_hash_hex)
+                        
+                        if hashingAlg.verify_password(salt, stored_hash, passwordFromClient):
                             print(f"[+] sending '200 ok' to client: {addr}")
                             conn.sendall("200 ok".encode('utf-8'))
                             print("[+] sent.")
@@ -91,7 +101,6 @@ try:
                             "time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                             "address": str(addr),
                             "username": username,
-                            "password": password,
                             "status": status
                         }
                         
@@ -144,10 +153,13 @@ try:
                             print("[+] found that username is in use")
                             conn.sendall("username already exists".encode('utf-8'))
                             return
+                        
+                    salt, hashed_tuple = hashingAlg.hash_new_password(newPassword)
+                    password_to_save = f"{salt.hex()}:{hashed_tuple.hex()}"
                     
                     users[newUsername] = {
                         "id": len(users) + 1,
-                        "password": newPassword,
+                        "password": password_to_save,
                         "first_name": firstName,
                         "last_name": lastName,
                         "gmail_account": gmail,

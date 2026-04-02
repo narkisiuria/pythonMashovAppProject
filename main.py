@@ -9,6 +9,7 @@ try:
     import os
     import webbrowser
     import random
+    import hashingAlg
     
     root = tk.Tk()
     root.withdraw() # מחביא את החלון הראשי כדי שנוכל להשתמש ב-Toplevel
@@ -587,7 +588,7 @@ try:
             if firstName.get().isdigit() or lastName.get().isdigit():
                 messagebox.showerror("שגיאה", "שם לא יכול להיות מספר")
                 return
-                
+                            
             SERVER_IP = '127.0.0.1' 
             PORT = 9999
             
@@ -597,7 +598,7 @@ try:
                     print(f"Connecting to {SERVER_IP}:{PORT}...")
                     s.connect((SERVER_IP, PORT))                                
                     
-                    subject = f"signUp|{firstName.get()}|{lastName.get()}|{gmail.get()}|{newUsername.get()}|{newPassword.get()}"
+                    subject = f"signUp|{firstName.get()}|{lastName.get()}|{gmail.get()}|{newUsername.get()}|{newPassword.get()}".strip()
                     s.sendall(subject.encode('utf-8'))
                     
                     raw_data = s.recv(1024)

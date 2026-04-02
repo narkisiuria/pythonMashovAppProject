@@ -1,50 +1,18 @@
 {
-    "admin123": {
+    "admin": {
         "id": 1,
-        "password": "kp9wma5z",
+        "password": "121b5ee0016601fba03792eec4cc9cbd:597e36f701ba42ac8d4c3486628b0575ced497021667ea28cf21d8d561fc16bf858edcc509d72467ae11ebf08e3ff031b5641b0b1e1640bfc71dfb5c51ae52d3",
         "first_name": "uria",
         "last_name": "narkisi",
-        "gmail_account": "urianarkisi@gmail.com",
-        "created_at": "31/03/2026 18:46:27"
+        "gmail_account": "urianar@gmail.com",
+        "created_at": "03/04/2026 00:22:01"
     },
-    "idoHagey67": {
+    "ayaqueen": {
         "id": 2,
-        "password": "1324354656",
-        "first_name": "ido",
-        "last_name": "kavas",
-        "gmail_account": "idoass123@gmail.com",
-        "created_at": "31/03/2026 18:51:36"
-    },
-    "arussi_r4": {
-        "id": 3,
-        "password": "6767676767676",
-        "first_name": "rannen",
-        "last_name": "arussi",
-        "gmail_account": "idohagey67@gmail.com",
-        "created_at": "31/03/2026 18:56:22"
-    },
-    "test": {
-        "id": 4,
-        "password": "kp9wma5z",
-        "first_name": "uria",
+        "password": "6fc00c63e7ecb3de642e4959d887add1:8c21f9bf5b4b7c632eff348210e83cd14ff6af53654e99f10b23fbbaeda132bcf44393abbf71738803e77285e86a5a03d88cde81ee0dfb150b949bd850c16adf",
+        "first_name": "aya",
         "last_name": "narkisi",
-        "gmail_account": "uria@gmail.com",
-        "created_at": "31/03/2026 19:01:19"
-    },
-    "uria dvir": {
-        "id": 5,
-        "password": "not67!",
-        "first_name": "uria",
-        "last_name": "dvir",
-        "gmail_account": "uriadviros1@gmail.com",
-        "created_at": "31/03/2026 19:04:19"
-    },
-    "uria123": {
-        "id": 6,
-        "password": "kp9wma5z",
-        "first_name": "uria",
-        "last_name": "narkisi",
-        "gmail_account": "adminestrator@gmail.com",
-        "created_at": "01/04/2026 00:24:57"
+        "gmail_account": "ayanar@gmail.com",
+        "created_at": "03/04/2026 00:35:15"
     }
 }
