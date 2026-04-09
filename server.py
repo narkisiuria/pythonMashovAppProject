@@ -1,5 +1,6 @@
 try:
     
+    import ssl
     import socket
     import json
     import datetime
@@ -177,15 +178,17 @@ try:
                 print(f"[+] Error handling client {addr}: {e}")
 
     def start_server():
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+        context.load_cert_chain("server.crt", "server.key")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
             s.listen()
-            print(f"[+] Server is listening on port {PORT} (Multi-threaded & Attempt Tracker)...")
-            
-            while True:
-                conn, addr = s.accept()
-                client_thread = threading.Thread(target=handle_client, args=(conn, addr))
-                client_thread.start()
+            print(f"[+] Server is listening on port: '{PORT}'")
+            with context.wrap_socket(s, server_side=True) as ss:
+                while True:
+                    conn, addr = ss.accept()
+                    client_thread = threading.Thread(target=handle_client, args=(conn, addr))
+                    client_thread.start()
 
     if __name__ == "__main__":
         start_server()
