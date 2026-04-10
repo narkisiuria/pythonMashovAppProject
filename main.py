@@ -193,92 +193,7 @@ try:
     ###########################################################
 
     def open_peak():
-        new_win = tk.Toplevel()
-        destroy_and_set_new_window(new_win)
-        new_win.title("עמוד ראשי")
-        
-        width = 400
-        height = 620
-        
-        screen_width = new_win.winfo_screenwidth()
-        screen_height = new_win.winfo_screenheight()
-        
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-        
-        new_win.geometry(f"{width}x{height}+{x}+{y}")
-
-        tk.Label(new_win, 
-                font="Arial 10 bold").pack(side="top", pady=(10,0))
-        tk.Label(new_win, 
-                text="?מה ברצונך לעשות", 
-                font="Arial 16 bold").pack(side="top")
-
-        tk.Button(new_win, 
-                text="מערכת שעות", 
-                fg="white", 
-                bg="#8a1476", 
-                font="Arial 14", 
-                width=13, 
-                height=6,
-                bd=0,
-                command=open_marechet,
-                cursor="hand2",).place(x=25, y=90)
-
-        tk.Button(new_win, 
-                text="דואר נכנס", 
-                fg="white", 
-                bg="#ff5500", 
-                font="Arial 14", 
-                width=13,
-                height=6,
-                bd=0,
-                command=open_doar,
-                cursor="hand2",).place(x=217, y=90)
-
-        tk.Button(new_win, 
-                text="ציונים שוטפים", 
-                fg="white", 
-                bg="#05a005", 
-                font="Arial 14", 
-                width=13,
-                height=6,
-                bd=0,
-                command=open_grades,
-                cursor="hand2",).place(x=25, y=265)
-
-        tk.Button(new_win, 
-                text="נוכחות בשיעור", 
-                fg="white", 
-                bg="#2302b9", 
-                font="Arial 14", 
-                width=13,
-                height=6,
-                bd=0,
-                command=open_class_chat,
-                cursor="hand2",).place(x=217, y=265)
-
-        tk.Button(new_win,
-                text="משימון", 
-                fg="white", 
-                bg="#f000c8", 
-                font="Arial 14", 
-                width=13,
-                height=6,
-                bd=0,
-                command=open_todo_list,
-                cursor="hand2",).place(x=25, y=440)
-
-        tk.Button(new_win, 
-                text="שיחרורון", 
-                fg="white", 
-                bg="#0195af", 
-                font="Arial 14", 
-                width=13,
-                height=6,
-                bd=0,
-                command=open_freer,
-                cursor="hand2",).place(x=217, y=440)
+        open_main_page(username="Guest")
 
     def open_main_page(username):
         global current_username
@@ -1047,7 +962,6 @@ try:
         main_frame = tk.Frame(new_win, bg="white")
         main_frame.place(relx=0.5, rely=0.5, anchor="center", width=470, height=650)
 
-        # -------- HEADER --------
         header = tk.Frame(main_frame, bg="#1a73e8", height=140)
         header.pack(fill="x")
         header.pack_propagate(False)
@@ -1076,7 +990,6 @@ try:
             bg="#1a73e8"
         ).pack()
 
-        # -------- FORM --------
         form_frame = tk.Frame(main_frame, bg="#f8fafc")
         form_frame.pack(fill="both", expand=True, padx=30, pady=25)
 
@@ -1111,7 +1024,152 @@ try:
             relief="flat"
         )
         code_entry.pack(fill="x", ipady=10)
+        
+        def open_class_chat_room():
+            new_win = tk.Toplevel()
+            destroy_and_set_new_window(new_win)
+            new_win.title("צ'אט כיתתי")
 
+            width, height = 620, 800
+            screen_width = new_win.winfo_screenwidth()
+            screen_height = new_win.winfo_screenheight()
+
+            x = (screen_width // 2) - (width // 2)
+            y = (screen_height // 2) - (height // 2)
+
+            new_win.geometry(f"{width}x{height}+{x}+{y}")
+            new_win.configure(bg="#f0f4f8")
+            new_win.resizable(False, False)
+
+            main_frame = tk.Frame(new_win, bg="white")
+            main_frame.place(relx=0.5, rely=0.5, anchor="center", width=580, height=760)
+
+            header = tk.Frame(main_frame, bg="#1a73e8", height=100)
+            header.pack(fill="x")
+            header.pack_propagate(False)
+
+            tk.Label(
+                header,
+                text="💬 צ'אט כיתה ט'2",
+                font=("Arial", 20, "bold"),
+                fg="white",
+                bg="#1a73e8"
+            ).pack(pady=(20, 5))
+
+            tk.Label(
+                header,
+                text="שיח פתוח עם הכיתה",
+                font=("Arial", 10),
+                fg="#dbeafe",
+                bg="#1a73e8"
+            ).pack()
+
+            chat_container = tk.Frame(main_frame, bg="#f8fafc")
+            chat_container.pack(fill="both", expand=True, padx=20, pady=15)
+
+            canvas = tk.Canvas(chat_container, bg="#f8fafc", highlightthickness=0)
+            scrollbar = ttk.Scrollbar(chat_container, orient="vertical", command=canvas.yview)
+
+            messages_frame = tk.Frame(canvas, bg="#f8fafc")
+
+            messages_frame.bind(
+                "<Configure>",
+                lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
+            )
+
+            canvas.create_window((0, 0), window=messages_frame, anchor="nw", width=520)
+            canvas.configure(yscrollcommand=scrollbar.set)
+
+            canvas.pack(side="left", fill="both", expand=True)
+            scrollbar.pack(side="right", fill="y")
+
+            def add_message(name, text, is_me=False):
+                outer = tk.Frame(messages_frame, bg="#f8fafc")
+                outer.pack(fill="x", pady=6, padx=8)
+
+                side = "right" if is_me else "left"
+                bubble_bg = "#1a73e8" if is_me else "white"
+                text_fg = "white" if is_me else "#334155"
+
+                bubble = tk.Frame(
+                    outer,
+                    bg=bubble_bg,
+                    padx=12,
+                    pady=10
+                )
+                bubble.pack(side=side)
+
+                tk.Label(
+                    bubble,
+                    text=name,
+                    font=("Arial", 9, "bold"),
+                    bg=bubble_bg,
+                    fg=text_fg
+                ).pack(anchor="e")
+
+                tk.Label(
+                    bubble,
+                    text=text,
+                    font=("Arial", 11),
+                    bg=bubble_bg,
+                    fg=text_fg,
+                    wraplength=320,
+                    justify="right"
+                ).pack(anchor="e", pady=(4, 0))
+
+            add_message("יונתן", "מישהו יודע מה יש במתמטיקה?", False)
+            add_message("אוריה", "כן, עמוד 57 תרגילים 1-5", True)
+            add_message("מאור", "וגם ללמוד למבחן", False)
+
+            input_frame = tk.Frame(main_frame, bg="#f8fafc", height=80)
+            input_frame.pack(fill="x", padx=20, pady=(0, 15))
+            input_frame.pack_propagate(False)
+
+            message_entry = tk.Entry(
+                input_frame,
+                font=("Arial", 11),
+                bd=0,
+                relief="flat"
+            )
+            message_entry.pack(
+                side="right",
+                fill="x",
+                expand=True,
+                padx=(10, 10),
+                pady=18,
+                ipady=10
+            )
+
+            tk.Button(
+                input_frame,
+                text="שלח",
+                font=("Arial", 11, "bold"),
+                bg="#1a73e8",
+                fg="white",
+                bd=0,
+                relief="flat",
+                padx=18,
+                pady=8,
+                cursor="hand2"
+            ).pack(side="left", padx=10, pady=18)
+
+            footer = tk.Frame(main_frame, bg="white", height=60)
+            footer.pack(fill="x")
+            footer.pack_propagate(False)
+
+            tk.Button(
+                footer,
+                text="חזרה",
+                font=("Arial", 12),
+                bg="#64748b",
+                fg="white",
+                bd=0,
+                padx=18,
+                pady=8,
+                cursor="hand2",
+                command=lambda: open_main_page(current_username)
+            ).pack(pady=10)
+            
         tk.Button(
             form_frame,
             text="כניסה לצ'אט",
@@ -1140,154 +1198,15 @@ try:
             pady=8,
             cursor="hand2",
             command=lambda: open_main_page(current_username)
-        ).pack(pady=15)
-        
-    def open_class_chat_room():
-        new_win = tk.Toplevel()
-        destroy_and_set_new_window(new_win)
-        new_win.title("צ'אט כיתתי")
-
-        width, height = 620, 800
-        screen_width = new_win.winfo_screenwidth()
-        screen_height = new_win.winfo_screenheight()
-
-        x = (screen_width // 2) - (width // 2)
-        y = (screen_height // 2) - (height // 2)
-
-        new_win.geometry(f"{width}x{height}+{x}+{y}")
-        new_win.configure(bg="#f0f4f8")
-        new_win.resizable(False, False)
-
-        main_frame = tk.Frame(new_win, bg="white")
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=580, height=760)
-
-        header = tk.Frame(main_frame, bg="#1a73e8", height=100)
-        header.pack(fill="x")
-        header.pack_propagate(False)
-
-        tk.Label(
-            header,
-            text="💬 צ'אט כיתה ט'2",
-            font=("Arial", 20, "bold"),
-            fg="white",
-            bg="#1a73e8"
-        ).pack(pady=(20, 5))
-
-        tk.Label(
-            header,
-            text="שיח פתוח עם הכיתה",
-            font=("Arial", 10),
-            fg="#dbeafe",
-            bg="#1a73e8"
-        ).pack()
-
-        chat_container = tk.Frame(main_frame, bg="#f8fafc")
-        chat_container.pack(fill="both", expand=True, padx=20, pady=15)
-
-        canvas = tk.Canvas(chat_container, bg="#f8fafc", highlightthickness=0)
-        scrollbar = ttk.Scrollbar(chat_container, orient="vertical", command=canvas.yview)
-
-        messages_frame = tk.Frame(canvas, bg="#f8fafc")
-
-        messages_frame.bind(
-            "<Configure>",
-            lambda e: canvas.configure(scrollregion=canvas.bbox("all"))
-        )
-
-        canvas.create_window((0, 0), window=messages_frame, anchor="nw", width=520)
-        canvas.configure(yscrollcommand=scrollbar.set)
-
-        canvas.pack(side="left", fill="both", expand=True)
-        scrollbar.pack(side="right", fill="y")
-
-        def add_message(name, text, is_me=False):
-            outer = tk.Frame(messages_frame, bg="#f8fafc")
-            outer.pack(fill="x", pady=6, padx=8)
-
-            side = "right" if is_me else "left"
-            bubble_bg = "#1a73e8" if is_me else "white"
-            text_fg = "white" if is_me else "#334155"
-
-            bubble = tk.Frame(
-                outer,
-                bg=bubble_bg,
-                padx=12,
-                pady=10
-            )
-            bubble.pack(side=side)
-
-            tk.Label(
-                bubble,
-                text=name,
-                font=("Arial", 9, "bold"),
-                bg=bubble_bg,
-                fg=text_fg
-            ).pack(anchor="e")
-
-            tk.Label(
-                bubble,
-                text=text,
-                font=("Arial", 11),
-                bg=bubble_bg,
-                fg=text_fg,
-                wraplength=320,
-                justify="right"
-            ).pack(anchor="e", pady=(4, 0))
-
-        add_message("יונתן", "מישהו יודע מה יש במתמטיקה?", False)
-        add_message("אוריה", "כן, עמוד 57 תרגילים 1-5", True)
-        add_message("מאור", "וגם ללמוד למבחן", False)
-
-        input_frame = tk.Frame(main_frame, bg="#f8fafc", height=80)
-        input_frame.pack(fill="x", padx=20, pady=(0, 15))
-        input_frame.pack_propagate(False)
-
-        message_entry = tk.Entry(
-            input_frame,
-            font=("Arial", 11),
-            bd=0,
-            relief="flat"
-        )
-        message_entry.pack(
-            side="right",
-            fill="x",
-            expand=True,
-            padx=(10, 10),
-            pady=18,
-            ipady=10
-        )
-
-        tk.Button(
-            input_frame,
-            text="שלח",
-            font=("Arial", 11, "bold"),
-            bg="#1a73e8",
-            fg="white",
-            bd=0,
-            relief="flat",
-            padx=18,
-            pady=8,
-            cursor="hand2"
-        ).pack(side="left", padx=10, pady=18)
-
-        footer = tk.Frame(main_frame, bg="white", height=60)
-        footer.pack(fill="x")
-        footer.pack_propagate(False)
-
-        tk.Button(
-            footer,
-            text="חזרה",
-            font=("Arial", 12),
-            bg="#64748b",
-            fg="white",
-            bd=0,
-            padx=18,
-            pady=8,
-            cursor="hand2",
-            command=lambda: open_main_page(current_username)
-        ).pack(pady=10)
+        ).pack(pady=15) 
         
     def open_todo_list():
+        tasks = []
+        with open("tasks.txt", "r", encoding='utf-8') as f:
+            for line in f:
+                task = line.strip()
+                tasks.append(task)
+                
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         new_win.title("To Do List")
@@ -1343,9 +1262,16 @@ try:
 
             var = tk.BooleanVar(value=done)
 
+            def remove_task():
+                if var.get():  # אם סומן
+                    if task_text in tasks:
+                        tasks.remove(task_text)
+                    row.destroy()
+
             tk.Checkbutton(
                 row,
                 variable=var,
+                command=remove_task,
                 bg="white",
                 activebackground="white"
             ).pack(side="left", padx=12, pady=12)
@@ -1358,14 +1284,16 @@ try:
                 fg="#334155",
                 anchor="e"
             ).pack(side="right", fill="x", expand=True, padx=15, pady=12)
+        
+        def add_task_to_gui():
+            add_task(task_text=str(task_entry.get()))
+            tasks.append(str(task_entry.get()))
+            task_entry.delete(0, tk.END)
 
-        # דוגמאות
-        add_task("מתמטיקה - עמוד 57 תרגילים 1-5")
-        add_task("אנגלית - ללמוד למבחן", True)
-        add_task("היסטוריה - להכין עבודה")
-        add_task("להביא מחברת חתומה")
+            
+        for task in tasks:
+            add_task(task)
 
-        # -------- INPUT --------
         input_frame = tk.Frame(main_frame, bg="#f8fafc", height=80)
         input_frame.pack(fill="x", padx=20, pady=(0, 15))
         input_frame.pack_propagate(False)
@@ -1384,6 +1312,24 @@ try:
             pady=18,
             ipady=10
         )
+        
+        def saveTasks():
+            with open("tasks.txt", "w", encoding="utf-8") as f:
+                for task in tasks:
+                    f.write(f"{task}\n")
+            
+            open_main_page(current_username)
+        
+        def checkIfValid():
+            if task_entry.get().strip() == "":
+                messagebox.showerror("שגיאה", "משימה לא יכולה להיות ריקה")
+                return
+            
+            if len(tasks) == 7:
+                messagebox.showerror("שגיאה", "הגעת למגבלת המשימות")
+                return
+            
+            add_task_to_gui()
 
         tk.Button(
             input_frame,
@@ -1395,10 +1341,10 @@ try:
             relief="flat",
             padx=18,
             pady=8,
-            cursor="hand2"
+            cursor="hand2",
+            command=checkIfValid,
         ).pack(side="left", padx=10, pady=18)
 
-        # -------- FOOTER --------
         footer = tk.Frame(main_frame, bg="white", height=60)
         footer.pack(fill="x")
         footer.pack_propagate(False)
@@ -1413,7 +1359,7 @@ try:
             padx=18,
             pady=8,
             cursor="hand2",
-            command=lambda: open_main_page(current_username)
+            command=saveTasks,
         ).pack(pady=10)
         
     def open_reminder():
