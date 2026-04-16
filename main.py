@@ -1,6 +1,6 @@
-# main.py
 
 try: 
+    import datetime
     import ssl
     import socket
     import tkinter as tk
@@ -11,9 +11,10 @@ try:
     import webbrowser
     import random
     import hashingAlg
+    from tkinter import simpledialog
     
     root = tk.Tk()
-    root.withdraw() # מחביא את החלון הראשי כדי שנוכל להשתמש ב-Toplevel
+    root.withdraw() 
     entry_username = None
     entry_password = None
 
@@ -23,10 +24,12 @@ try:
 
     current_toplevel_win = None
     current_username = ""
+    current_user_role = ""
+    current_user_class = ""
     splash_root = None
     
     def create_secure_socket():
-        context = ssl.create_default_context(cafile="server.crt")
+        context = ssl.create_default_context(cafile="keys/server.crt")
         raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         secure_socket = context.wrap_socket(raw_socket, server_hostname="localhost")
         secure_socket.settimeout(5)
@@ -151,7 +154,7 @@ try:
             cursor="hand2",
             command=open_peak
         )
-        peak_btn.pack(fill="x", ipady=12)
+        peak_btn.pack(fill="x", ipady=14)
 
         footer_frame = tk.Frame(main_frame,
                                 bg="#f8f9fa",
@@ -196,7 +199,8 @@ try:
         open_main_page(username="Guest")
 
     def open_main_page(username):
-        global current_username
+        global current_username, roll
+
 
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
@@ -326,7 +330,7 @@ try:
     ###########################################################
 
     def forgotPass():
-        messagebox.showinfo(title="?שכחת את הסיסמה", message="שנה את סיסמתך במשרד המזכירות בבית הספר")
+        messagebox.showinfo(title="?שכחת את הסיסמה", message="שנה/י את סיסמתך במשרד המזכירות בבית הספר")
 
 
     def openPrivecyPolicy():
@@ -484,7 +488,35 @@ try:
                  font=("Arial", 50)).pack()    
         
         return login_win
- 
+    
+    def ask_teacher_code(username):
+        code_win = tk.Toplevel(root)
+        code_win.title("אימות מורה")
+
+        width, height = 400, 250
+        x = (code_win.winfo_screenwidth() // 2) - (width // 2)
+        y = (code_win.winfo_screenheight() // 2) - (height // 2)
+
+        code_win.geometry(f"{width}x{height}+{x}+{y}")
+        code_win.configure(bg="white")
+        code_win.resizable(False, False)
+
+        tk.Label(
+            code_win,
+            text="הכנס קוד כניסה למורים",
+            font=("Arial", 16, "bold"),
+            bg="white",
+            fg="#1a73e8"
+        ).pack(pady=30)
+
+        code_entry = tk.Entry(
+            code_win,
+            font=("Arial", 16),
+            justify="center",
+            show="*"
+        )
+        code_entry.pack(pady=10, ipady=6)
+        
     def attempt_login():
         typedUSERNAME = entry_username.get()
         typedPASSWORD = entry_password.get()
@@ -508,9 +540,16 @@ try:
                 dataFromServer = raw_data.decode('utf-8').strip()
                 print(f"Received from server: {dataFromServer}")
 
-                if dataFromServer == "200 ok":
-                    print("success!")
-                    root.withdraw() 
+                if dataFromServer.startswith("200 ok"):
+                    global current_user_role, current_user_class
+
+                    parts = dataFromServer.split("|")
+                    current_user_role = parts[1]
+                    current_user_class = parts[2]
+
+                    print(current_user_role, current_user_class)
+
+                    root.withdraw()
                     open_main_page(typedUSERNAME)
                 
                 elif dataFromServer == "attempt limit reached":
@@ -529,92 +568,149 @@ try:
     def signUp():
         def attemptSignUp():
             all_entries = [firstName, lastName, gmail, newUsername, newPassword]
+
             if any(entry.get().strip() == "" for entry in all_entries):
                 messagebox.showerror("שגיאה", "נא למלא את כל השדות")
                 return
-            
-            if "@" not in str(gmail.get()):
+
+            if class_box.get().strip() == "":
+                messagebox.showerror("שגיאה", "נא לבחור כיתה")
+                return
+
+            if role_box.get().strip() == "":
+                messagebox.showerror("שגיאה", "נא לבחור תפקיד")
+                return
+
+            if "@" not in gmail.get():
                 messagebox.showerror("שגיאה", "אימייל לא תקין")
                 return
-            
-            elif gmail.get().startswith("@") or gmail.get().endswith("@"):
-                messagebox.showerror("שגיאה", "אימייל לא תקין")     
-                return 
-            
+
+            if gmail.get().startswith("@") or gmail.get().endswith("@"):
+                messagebox.showerror("שגיאה", "אימייל לא תקין")
+                return
+
             if firstName.get().isdigit() or lastName.get().isdigit():
                 messagebox.showerror("שגיאה", "שם לא יכול להיות מספר")
                 return
-                            
-            SERVER_IP = '127.0.0.1' 
+
+            code = simpledialog.askstring(
+                "קוד כניסה",
+                "הכנס קוד כניסה:",
+                show="*"
+            )
+
+            if not code:
+                return
+
+            SERVER_IP = '127.0.0.1'
             PORT = 9999
-            
+
             try:
                 with create_secure_socket() as s:
                     print(f"Connecting to {SERVER_IP}:{PORT}...")
-                    s.connect((SERVER_IP, PORT))                                
-                    
-                    subject = f"signUp|{firstName.get()}|{lastName.get()}|{gmail.get()}|{newUsername.get()}|{newPassword.get()}".strip()
-                    s.sendall(subject.encode('utf-8'))
-                    
+                    s.connect((SERVER_IP, PORT))
+
+                    subject = (
+                        f"signUp|"
+                        f"{firstName.get()}|"
+                        f"{lastName.get()}|"
+                        f"{gmail.get()}|"
+                        f"{newUsername.get()}|"
+                        f"{newPassword.get()}|"
+                        f"{class_box.get()}|"
+                        f"{role_box.get()}|"
+                        f"{code}"
+                    )
+
+                    s.sendall(subject.encode("utf-8"))
+
                     raw_data = s.recv(1024)
                     if not raw_data:
-                        print("No response from server")
+                        messagebox.showerror("שגיאה", "אין תגובה מהשרת")
                         return
 
-                    dataFromServer = raw_data.decode('utf-8').strip()
+                    dataFromServer = raw_data.decode("utf-8").strip()
                     print(f"Received from server: {dataFromServer}")
 
-                    if dataFromServer == "200 ok":
-                        print("success!")
-                        messagebox.showinfo("הצלחה", "חשבון נותר בהצלחה סגור את החלון ותתחבר")
-                        return
+                    if dataFromServer.startswith("200"):
+                        parts = dataFromServer.split("|")
+                        role = parts[1]
+                        class_name = parts[2]
                     
-                    elif dataFromServer == "400 bad request":
-                        print("bad request sent to server")
-                        return
-                    
+                        messagebox.showinfo("הצלחה", "החשבון נוצר בהצלחה")
+                        new_win.destroy()
+
                     elif dataFromServer == "gmail already exists":
-                        print("email is already in use")
                         messagebox.showerror("שגיאה", "אימייל כבר בשימוש")
-                        return
 
                     elif dataFromServer == "username already exists":
-                        print("username already exists")
                         messagebox.showerror("שגיאה", "שם משתמש כבר בשימוש")
-                        return
+
+                    elif dataFromServer == "invalid teacher code":
+                        messagebox.showerror("שגיאה", "קוד מורה שגוי")
+
+                    elif dataFromServer == "invalid student code":
+                        messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
+
+                    else:
+                        messagebox.showerror("שגיאה", dataFromServer)
 
             except ConnectionRefusedError:
-                messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+                messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
             except Exception as e:
                 messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
-    
-            
-            
+
         new_win = tk.Toplevel(root)
         new_win.title("MashovApp / הרשמה")
-        
-        width, height = 520, 770
+
+        width, height = 520, 860
         x = (new_win.winfo_screenwidth() // 2) - (width // 2)
         y = (new_win.winfo_screenheight() // 2) - (height // 2)
+
         new_win.geometry(f"{width}x{height}+{x}+{y}")
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
-        
+
         main_frame = tk.Frame(new_win, bg="white", bd=0)
-        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=520, height=755)
+        main_frame.place(relx=0.5, rely=0.5, anchor="center", width=520, height=840)
 
         header_frame = tk.Frame(main_frame, bg="#1a73e8", height=160)
         header_frame.pack(fill="x")
         header_frame.pack_propagate(False)
-        
-        tk.Label(header_frame, text="📝", font=("Arial", 45), fg="white", bg="#1a73e8").pack(pady=(25, 0))
-        tk.Label(header_frame, text="יצירת חשבון חדש", font=("Arial", 24, "bold"), fg="white", bg="#1a73e8").pack()
-        
+
+        tk.Label(
+            header_frame,
+            text="📝",
+            font=("Arial", 45),
+            fg="white",
+            bg="#1a73e8"
+        ).pack(pady=(25, 0))
+
+        tk.Label(
+            header_frame,
+            text="יצירת חשבון חדש",
+            font=("Arial", 24, "bold"),
+            fg="white",
+            bg="#1a73e8"
+        ).pack()
+
         form_frame = tk.Frame(main_frame, bg="white")
         form_frame.pack(fill="both", expand=True, padx=45, pady=10)
-        
-        label_style = {"font": ("Arial", 10, "bold"), "fg": "#333333", "bg": "white", "anchor": "e"}
-        entry_style = {"font": ("Arial", 12), "bg": "#f8f9fa", "relief": "solid", "bd": 1, "justify": "right"}
+
+        label_style = {
+            "font": ("Arial", 10, "bold"),
+            "fg": "#333333",
+            "bg": "white",
+            "anchor": "e"
+        }
+
+        entry_style = {
+            "font": ("Arial", 12),
+            "bg": "#f8f9fa",
+            "relief": "solid",
+            "bd": 1,
+            "justify": "right"
+        }
 
         fields = [
             ("שם פרטי", "firstName"),
@@ -623,8 +719,9 @@ try:
             ("שם משתמש", "newUsername"),
             ("סיסמה", "newPassword")
         ]
-        
+
         entries = {}
+
         for label_text, var_name in fields:
             tk.Label(form_frame, text=label_text, **label_style).pack(fill="x", pady=(10, 2))
             ent = tk.Entry(form_frame, **entry_style)
@@ -632,25 +729,67 @@ try:
             entries[var_name] = ent
 
         firstName, lastName, gmail, newUsername, newPassword = entries.values()
-        
+
         gmail.insert(0, "example@gmail.com")
-        
-        suggested = "".join([random.choice("123!@#%$%^&89*/") for _ in range(8)])
-        newPassword.insert(0, suggested)
-        
-        tk.Button(form_frame, text="צור חשבון עכשיו", font=("Arial", 16, "bold"), 
-                  fg="white", bg="#1a73e8", activebackground="#1557b0", 
-                  relief="flat", cursor="hand2", command=attemptSignUp).pack(fill="x", pady=(25, 10), ipady=12)
+
+        tk.Label(form_frame, text="כיתה", **label_style).pack(fill="x", pady=(10, 2))
+        class_box = ttk.Combobox(
+            form_frame,
+            values=["ט1", "ט2", "ט3", "ט4", "ט5", "ט6"],
+            state="readonly",
+            font=("Arial", 12)
+        )
+        class_box.pack(fill="x", ipady=6)
+
+        tk.Label(form_frame, text="תפקיד", **label_style).pack(fill="x", pady=(10, 2))
+        role_box = ttk.Combobox(
+            form_frame,
+            values=["student", "teacher"],
+            state="readonly",
+            font=("Arial", 12)
+        )
+        role_box.pack(fill="x", ipady=6)
+
+        tk.Button(
+            form_frame,
+            text="צור חשבון עכשיו",
+            font=("Arial", 16, "bold"),
+            fg="white",
+            bg="#1a73e8",
+            activebackground="#1557b0",
+            relief="flat",
+            cursor="hand2",
+            command=attemptSignUp
+        ).pack(fill="x", pady=(25, 10), ipady=12)
 
         footer_frame = tk.Frame(main_frame, bg="white")
         footer_frame.pack(side="bottom", pady=20)
-        
-        tk.Label(footer_frame, text="?כבר יש לך חשבון", font=("Arial", 11), fg="#999999", bg="white").pack()
-        tk.Button(footer_frame, text="חזור למסך ההתחברות", font=("Arial", 11, "underline", "bold"), 
-                  fg="#1a73e8", bg="white", bd=0, cursor="hand2", 
-                  command=new_win.destroy).pack()
-        
-        tk.Label(footer_frame, text="🏫", font=("Arial", 40), bg="white").pack(pady=10)
+
+        tk.Label(
+            footer_frame,
+            text="?כבר יש לך חשבון",
+            font=("Arial", 11),
+            fg="#999999",
+            bg="white"
+        ).pack()
+
+        tk.Button(
+            footer_frame,
+            text="חזור למסך ההתחברות",
+            font=("Arial", 11, "underline", "bold"),
+            fg="#1a73e8",
+            bg="white",
+            bd=0,
+            cursor="hand2",
+            command=new_win.destroy
+        ).pack()
+
+        tk.Label(
+            footer_frame,
+            text="🏫",
+            font=("Arial", 40),
+            bg="white"
+        ).pack(pady=10)
 
         return new_win
 
@@ -2057,7 +2196,6 @@ try:
         class_cb.bind("<<ComboboxSelected>>", refresh_schedule)
         day_cb.bind("<<ComboboxSelected>>", refresh_schedule)
 
-        # ---------------- Footer ----------------
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
         footer_frame.pack(fill="x", side="bottom")
         footer_frame.pack_propagate(False)
@@ -2081,3 +2219,5 @@ except KeyboardInterrupt:
     print("Keyboard Interrupt. QUITING!")
 except ModuleNotFoundError:
     print(f"module not found")
+except ConnectionAbortedError:
+    print("connection abborted")

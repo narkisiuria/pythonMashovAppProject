@@ -9,12 +9,11 @@
         "created_at": "16/04/2026 23:37:09"
     },
     "1": {
-        "id": 3,
-        "password": "7ca18a38b77945a208b4fb8e17725906:a1e3c6c1e59af533a016e2e8776a28df30d2f8ca500f3fdc7405e203f1a17f2f27601a3a50e294fed63ada811487eec37934fa82618a9fcfacd5ccbdef020b0c",
+        "id": 2,
         "first_name": "rdv",
         "last_name": "dvr",
         "gmail_account": "example@gmail.com",
-        "roll": "teacher",
+        "role": "teacher",
         "class": "9th3",
         "created_at": "16/04/2026 23:50:08"
     }

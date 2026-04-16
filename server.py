@@ -1,11 +1,12 @@
 try:
-    
+    import os
     import ssl
     import socket
     import json
     import datetime
     import threading
     import hashingAlg
+    print(os.getcwd())
 
     HOST = '0.0.0.0'
     PORT = 9999
@@ -75,7 +76,9 @@ try:
                         
                         if hashingAlg.verify_password(salt, stored_hash, passwordFromClient):
                             print(f"[+] sending '200 ok' to client: {addr}")
-                            conn.sendall("200 ok".encode('utf-8'))
+                            role = userData["roll"]
+                            class_name = userData["class"]
+                            conn.sendall(f"200 ok|{role}|{class_name}".encode("utf-8"))
                             print("[+] sent.")
                             status = "success"
                             with attempts_lock:
@@ -126,7 +129,7 @@ try:
                 
                 elif dataFromClient.startswith("signUp|"):
                     parts = dataFromClient.split("|")
-                    if len(parts) != 6:
+                    if len(parts) != 9:
                         print(f"[+] sending '400 bad request' to client: {addr}")
                         conn.sendall("400 bad request".encode('utf-8'))
                         print(f"[+] sent.")
@@ -138,7 +141,23 @@ try:
                     gmail = parts[3]
                     newUsername = parts[4]
                     newPassword = parts[5]
+                    class_map = {
+                        "ט1": "9th1",
+                        "ט2": "9th2",
+                        "ט3": "9th3",
+                        "ט4": "9th4",
+                        "ט5": "9th5",
+                        "ט6": "9th6"
+                    }
+
+                    class_raw = parts[6].strip()
+                    class_name = class_map.get(class_raw, class_raw)
+
+                    print(f"class name: {class_name}")
+                    role = parts[7]
+                    access_code = parts[8]
                     timeCreated = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+                    
                     
                     print("[+] opening users.json")
                     with open("users.json", "r", encoding='utf-8') as f:
@@ -155,6 +174,58 @@ try:
                             conn.sendall("username already exists".encode('utf-8'))
                             return
                         
+                        print("openning teacher key file")
+                        with open("keys/teachers.key", "r", encoding='utf-8') as f:
+                            for line in f:
+                                line = line.strip()
+                                teacher_code = line
+                        
+                        print("openning student key file")
+                        with open("keys/students.key", "r", encoding='utf-8') as f:
+                            for line in f:
+                                line = line.strip()      
+                                student_code = line
+
+                        if role == "teacher":
+                            if access_code != teacher_code:
+                                conn.sendall("invalid teacher code".encode("utf-8"))
+                                return
+
+                        elif role == "student":
+                            if access_code != student_code:
+                                conn.sendall("invalid student code".encode("utf-8"))
+                                return
+
+                        else:
+                            conn.sendall("invalid role".encode("utf-8"))
+                            return
+                        
+                                                
+                        try:
+                            with open(f"classesStudents/{class_name}/students-{class_name}.json", "r", encoding='utf-8') as f:
+                                data = json.load(f)
+                                if isinstance(data, list):
+                                    users = {u.get("username", str(i)): u for i, u in enumerate(data)}
+                                else:
+                                    users = data
+                        except (FileNotFoundError, json.JSONDecodeError):
+                            users = {}
+
+                        new_user_data = {
+                            "id": len(users) + 1,
+                            "first_name": firstName,
+                            "last_name": lastName,
+                            "gmail_account": gmail,
+                            "role": role,
+                            "class": class_name,
+                            "created_at": timeCreated
+                        }
+
+                        users[newUsername] = new_user_data
+                        with open(f"classesStudents/{class_name}/students-{class_name}.json", "w", encoding='utf-8') as f:
+                            json.dump(users, f, indent=4)
+                            print("[+] successfully appended new user")
+                        
                     salt, hashed_tuple = hashingAlg.hash_new_password(newPassword)
                     password_to_save = f"{salt.hex()}:{hashed_tuple.hex()}"
                     
@@ -164,22 +235,25 @@ try:
                         "first_name": firstName,
                         "last_name": lastName,
                         "gmail_account": gmail,
+                        "roll": role,
+                        "class": class_name,
                         "created_at": timeCreated
                     }
                     
                     with open("users.json", "w", encoding='utf-8') as f:
                         print("[+] appending new user")
                         json.dump(users, f, indent=4)
-                        print("[+] successfuly appended new user") 
-                    
-                        conn.sendall("200 ok".encode('utf-8'))            
+                        print("[+] successfuly appended new user")  
+                        
+                        conn.sendall(f"200 ok|{role}|{class_name}".encode('utf-8'))          
                     
             except ValueError as e:
                 print(f"[+] Error handling client {addr}: {e}")
 
     def start_server():
         context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
-        context.load_cert_chain("server.crt", "server.key")
+        print("openning server key and crt")
+        context.load_cert_chain("keys/server.crt", "keys/server.key")
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.bind((HOST, PORT))
             s.listen()
