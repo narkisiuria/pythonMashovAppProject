@@ -1,0 +1,15 @@
+{
+    "kav ass": {
+        "id": 1,
+        "first_name": "ido",
+        "last_name": "kav ass",
+        "gmail_account": "kavas99@gmail.com",
+        "role": "student",
+        "class": "9th1",
+        "tasks": [
+            "אוכל",
+            "שינה"
+        ],
+        "created_at": "17/04/2026 18:46:54"
+    }
+}

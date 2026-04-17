@@ -10,7 +10,7 @@ try:
     import os
     import webbrowser
     import random
-    import hashingAlg
+    from utils import hashingAlg
     from tkinter import simpledialog
     
     root = tk.Tk()
@@ -1340,11 +1340,47 @@ try:
         ).pack(pady=15) 
         
     def open_todo_list():
-        tasks = []
-        with open("tasks.txt", "r", encoding='utf-8') as f:
-            for line in f:
-                task = line.strip()
-                tasks.append(task)
+        global current_username, current_user_class
+        SERVER_IP = '127.0.0.1'
+        PORT = 9999
+
+        try:
+            with create_secure_socket() as s:
+                print(f"Connecting to {SERVER_IP}:{PORT}...")
+                s.connect((SERVER_IP, PORT))
+
+                subject = f"tasks|{current_user_class}|{current_username}"
+
+                s.sendall(subject.encode("utf-8"))
+
+                raw_data = s.recv(1024)
+                if not raw_data:
+                    messagebox.showerror("שגיאה", "אין תגובה מהשרת")
+                    return
+
+                dataFromServer = raw_data.decode("utf-8").strip()
+                print(f"Received from server: {dataFromServer}")
+                
+                dataFromServer = raw_data.decode("utf-8").strip()
+                print(f"Received from server: {dataFromServer}")
+
+                if dataFromServer.startswith("username:"):
+                    messagebox.showerror("שגיאה", "עליך להירשם למערכת כדי להשתמש באופציה זו")
+                    open_login_window()
+                    return
+
+                else:
+                    try:
+                        tasks = json.loads(dataFromServer)
+                        print(f"Parsed tasks as list: {tasks}")
+                    except json.JSONDecodeError:
+                        print("Error decoding tasks from server")
+                        tasks = []
+
+        except ConnectionRefusedError:
+            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
+        except Exception as e:
+            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
                 
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
@@ -1361,11 +1397,9 @@ try:
         new_win.configure(bg="#f0f4f8")
         new_win.resizable(False, False)
 
-        # -------- MAIN FRAME --------
         main_frame = tk.Frame(new_win, bg="white")
         main_frame.place(relx=0.5, rely=0.5, anchor="center", width=580, height=760)
 
-        # -------- HEADER --------
         header = tk.Frame(main_frame, bg="#1a73e8", height=100)
         header.pack(fill="x")
         header.pack_propagate(False)
@@ -1386,7 +1420,6 @@ try:
             bg="#1a73e8"
         ).pack()
 
-        # -------- TASK LIST --------
         tasks_frame = tk.Frame(main_frame, bg="#f8fafc")
         tasks_frame.pack(fill="both", expand=True, padx=20, pady=15)
 
@@ -1402,7 +1435,7 @@ try:
             var = tk.BooleanVar(value=done)
 
             def remove_task():
-                if var.get():  # אם סומן
+                if var.get(): 
                     if task_text in tasks:
                         tasks.remove(task_text)
                     row.destroy()
@@ -1453,6 +1486,23 @@ try:
         )
         
         def saveTasks():
+            tasks_json = json.dumps(tasks, ensure_ascii=False)
+            update_message = f"update_tasks|{current_user_class}|{current_username}|{tasks_json}"
+            
+            try:
+                with create_secure_socket() as s:
+                    s.connect((SERVER_IP, PORT))
+                    s.sendall(update_message.encode("utf-8"))
+                    
+                    response = s.recv(1024).decode("utf-8")
+                    if response == "200 ok":
+                        print("[+] Tasks saved to server successfully")
+                    else:
+                        print(f"[-] Server error during save: {response}")
+                        
+            except Exception as e:
+                messagebox.showwarning("שגיאת סנכרון", f"המשימות נשמרו מקומית אך לא בשרת: {e}")
+
             with open("tasks.txt", "w", encoding="utf-8") as f:
                 for task in tasks:
                     f.write(f"{task}\n")
@@ -1542,7 +1592,7 @@ try:
                                                 break
                                         
                                         else:      
-                                                with open("reminder.json", "w", encoding="utf-8") as f:
+                                                with open("data/reminder.json", "w", encoding="utf-8") as f:
                                                         json.dump(fields, f, indent=4, ensure_ascii=False)
                                                         messagebox.showinfo("תזכורון מוצלח", "טופס התזכורון נשמר בהצלחה!")
                                                         break
@@ -1553,8 +1603,8 @@ try:
         def delete_existing():
                 files = os.listdir(".")
                 for file in files:
-                        if os.path.exists("reminder.json"):
-                                os.remove("reminder.json")
+                        if os.path.exists("data/reminder.json"):
+                                os.remove("data/reminder.json")
                                 messagebox.showinfo("הצלחה", "התזכורון הקיים נמחק")
                                 break
                         
@@ -1564,7 +1614,7 @@ try:
         def see_existing():
                 files = os.listdir(".")
                 for file in files:
-                        if os.path.exists("reminder.json"):
+                        if os.path.exists("data/reminder.json"):
                                 new_win = tk.Toplevel()
                                 destroy_and_set_new_window(new_win)
                                 new_win.title("ראיית תזכורון קיים")
@@ -1581,7 +1631,7 @@ try:
                                 new_win.geometry(f"{width}x{height}+{x}+{y}")
                                 
                                 try:
-                                        with open("reminder.json", "r", encoding="utf-8") as f:
+                                        with open("data/reminder.json", "r", encoding="utf-8") as f:
                                                 data = json.load(f)
                                                 entery_class = data.get("כיתה", "תוכן לא נמצא")
                                                 entery_notice = data.get("לשים לב ל", "תוכן לא נמצא")
@@ -2075,7 +2125,7 @@ try:
 
         # ---------------- טעינת לוגיקה קיימת ----------------
         try:
-            with open("schedule.json", "r", encoding="utf-8") as f:
+            with open("data/schedule.json", "r", encoding="utf-8") as f:
                 schedule_data = json.load(f)
         except Exception as e:
             messagebox.showerror("שגיאה", f"שגיאה בטעינת המערכת: {e}")

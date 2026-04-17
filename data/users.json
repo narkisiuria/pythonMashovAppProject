@@ -10,18 +10,13 @@
         "created_at": "17/04/2026 18:41:13"
     },
     "1": {
-        "id": 2,
+        "id": 3,
+        "password": "e66fa7d8b0702b32c099c03b554ec34d:8658f7f29fea64afe67b8f0f1c1e76302445aef303285277ac3d4bdc1fd8f6bdcf1a368db6322c969d78c6514e29fcffa5bad680ab3c40d8f0cc81ebade80462",
         "first_name": "tgh",
         "last_name": "htfhf",
         "gmail_account": "1le@gmail.com",
-        "role": "teacher",
+        "roll": "teacher",
         "class": "9th3",
-        "tasks": [
-            "לאכול",
-            "לישון",
-            "יפה",
-            "בד'יה"
-        ],
         "created_at": "17/04/2026 18:48:29"
     }
 }

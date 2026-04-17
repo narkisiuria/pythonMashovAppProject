@@ -5,7 +5,7 @@ try:
     import json
     import datetime
     import threading
-    import hashingAlg
+    from utils import hashingAlg
     print(os.getcwd())
 
     HOST = '0.0.0.0'
@@ -16,10 +16,10 @@ try:
 
     def load_users():
         try:
-            with open("users.json", "r", encoding="utf-8") as f:
+            with open("data/users.json", "r", encoding="utf-8") as f:
                 return json.load(f)
         except FileNotFoundError:
-            print("Error: users.json not found. Please create it.")
+            print("Error: data/users.json not found. Please create it.")
             return {}
         except Exception as e:
             print(f"Error loading users: {e}")
@@ -100,7 +100,7 @@ try:
                             failed_attempts_tracker[client_ip] = failed_attempts_tracker.get(client_ip, 0) + 1
                             print(f"[+] Failed attempt {failed_attempts_tracker[client_ip]} from {client_ip}")
 
-                    with open("server_connection_logs.json", "a", encoding="utf-8") as f:
+                    with open("data/server_connection_logs.json", "a", encoding="utf-8") as f:
                         logFields = {
                             "time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                             "address": str(addr),
@@ -120,12 +120,72 @@ try:
                 elif dataFromClient.startswith("get_schedule|"):
                     class_name = dataFromClient.split("|")[1]
                     try:
-                        with open("schedule.json", "r", encoding="utf-8") as f:
+                        with open("data/schedule.json", "r", encoding="utf-8") as f:
                             schedules = json.load(f)
                             class_schedule = schedules.get(class_name, {})
                             conn.sendall(json.dumps(class_schedule, ensure_ascii=False).encode('utf-8'))
                     except FileNotFoundError:
                         conn.sendall("error|file not found".encode('utf-8'))
+                
+                elif dataFromClient.startswith("tasks|"):
+                    parts = dataFromClient.split("|")
+                    
+                    class_name = parts[1]
+                    username = parts[2]
+                    
+                    with open(f"classesStudents/{class_name}/students-{class_name}.json", "r", encoding='utf-8') as f:
+                        students = json.load(f)
+                        
+                        if username in students:
+                            print(f"[+] found that '{username}' is in students, proceeding...")
+                            
+                            raw_tasks = students[username].get("tasks", [])
+                            
+                            if raw_tasks == "no tasks":
+                                tasks_list = [] 
+                            elif isinstance(raw_tasks, str):
+                                tasks_list = [raw_tasks]  
+                            else:
+                                tasks_list = raw_tasks
+                                
+                            response = json.dumps(tasks_list, ensure_ascii=False)
+                            conn.sendall(response.encode('utf-8'))
+                            return
+
+                        else:
+                            conn.sendall(f"username: '{username}' is not in this class?!".encode('utf-8'))
+                            return
+                
+                elif dataFromClient.startswith("update_tasks|"):
+                    parts = dataFromClient.split("|", 3) 
+                    if len(parts) < 4:
+                        conn.sendall("400 bad request".encode('utf-8'))
+                        return
+
+                    class_name = parts[1]
+                    username = parts[2]
+                    new_tasks_json = parts[3]
+
+                    file_path = f"classesStudents/{class_name}/students-{class_name}.json"
+                    
+                    try:
+                        with open(file_path, "r", encoding='utf-8') as f:
+                            all_students = json.load(f)
+
+                        if username in all_students:
+                            all_students[username]["tasks"] = json.loads(new_tasks_json)
+                            
+                            with open(file_path, "w", encoding='utf-8') as f:
+                                json.dump(all_students, f, indent=4, ensure_ascii=False)
+                            
+                            conn.sendall("200 ok".encode('utf-8'))
+                            print(f"[+] Tasks updated for {username} in {class_name}")
+                        else:
+                            conn.sendall("user not found".encode('utf-8'))
+
+                    except Exception as e:
+                        print(f"[-] Error updating tasks: {e}")
+                        conn.sendall(f"error|{e}".encode('utf-8'))
                 
                 elif dataFromClient.startswith("signUp|"):
                     parts = dataFromClient.split("|")
@@ -160,7 +220,7 @@ try:
                     
                     
                     print("[+] opening users.json")
-                    with open("users.json", "r", encoding='utf-8') as f:
+                    with open("data/users.json", "r", encoding='utf-8') as f:
                         users = json.load(f)
                         
                         for username, data in users.items():
@@ -210,6 +270,7 @@ try:
                                     users = data
                         except (FileNotFoundError, json.JSONDecodeError):
                             users = {}
+                        
 
                         new_user_data = {
                             "id": len(users) + 1,
@@ -218,10 +279,12 @@ try:
                             "gmail_account": gmail,
                             "role": role,
                             "class": class_name,
+                            "tasks": [],
                             "created_at": timeCreated
                         }
 
                         users[newUsername] = new_user_data
+                        
                         with open(f"classesStudents/{class_name}/students-{class_name}.json", "w", encoding='utf-8') as f:
                             json.dump(users, f, indent=4)
                             print("[+] successfully appended new user")
@@ -240,7 +303,7 @@ try:
                         "created_at": timeCreated
                     }
                     
-                    with open("users.json", "w", encoding='utf-8') as f:
+                    with open("data/users.json", "w", encoding='utf-8') as f:
                         print("[+] appending new user")
                         json.dump(users, f, indent=4)
                         print("[+] successfuly appended new user")  
