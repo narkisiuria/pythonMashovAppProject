@@ -23,5 +23,5 @@
 הפעלת השרת -> 
 הפעלת ממשק משתמש:
    ```bash
-   python server.py:
+   python server.py
    python main.py
