@@ -11,5 +11,25 @@
             "שינה"
         ],
         "created_at": "17/04/2026 18:46:54"
+    },
+    "noam123": {
+        "id": 2,
+        "first_name": "נעם",
+        "last_name": "ששון",
+        "gmail_account": "noam123@gmail.com",
+        "role": "teacher",
+        "class": "9th1",
+        "tasks": [],
+        "created_at": "19/04/2026 19:03:48"
+    },
+    "ploni123": {
+        "id": 3,
+        "first_name": "פלוני",
+        "last_name": "פלוני",
+        "gmail_account": "ploni@gmail.com",
+        "role": "teacher",
+        "class": "9th1",
+        "tasks": [],
+        "created_at": "19/04/2026 19:07:08"
     }
 }

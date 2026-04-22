@@ -144,7 +144,7 @@ try:
 
         peak_btn = tk.Button(
             btn_frame,
-            text="צפייה ללא התחברות",
+            text="כניסה כאורח ",
             font=("Arial", 14),
             bg="white",
             fg="#1a73e8",
@@ -196,10 +196,47 @@ try:
     ###########################################################
 
     def open_peak():
-        open_main_page(username="Guest")
+        global current_user_role
+        messagebox.showwarning("אורח יקר", "בתור אורח אתה לא תוכל להשתמש בכל הפיצרים")
+        
+        SERVER_IP = '127.0.0.1' 
+        PORT = 9999
+        
+        try:
+            with create_secure_socket() as s:
+                print(f"Connecting to {SERVER_IP}:{PORT}...")
+                s.connect((SERVER_IP, PORT))                                
+                
+                subject = f"guest"
+                s.sendall(subject.encode('utf-8'))
+                
+                raw_data = s.recv(1024)
+                if not raw_data:
+                    print("No response from server")
+                    return
+
+                dataFromServer = raw_data.decode('utf-8').strip()
+                print(f"Received from server: {dataFromServer}")
+
+                if dataFromServer.startswith("200"):
+                    current_user_role = "guest"
+                    print("successfuly entered as a guest")
+                    open_main_page(current_user_role)
+                    return
+                
+                else:
+                    messagebox.showerror("שגיאה", "שגיאת שרת")
+                    return
+                    
+
+        except ConnectionRefusedError:
+            messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת. וודא שהוא פועל.")
+            
+        except Exception as e:
+            messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
 
     def open_main_page(username):
-        global current_username, roll
+        global current_username, current_user_role
 
 
         new_win = tk.Toplevel()
@@ -311,7 +348,6 @@ try:
             **button_style
         ).grid(row=2, column=1, padx=15, pady=15)
 
-        # פוטר
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=60)
         footer_frame.pack(fill="x", side="bottom")
         footer_frame.pack_propagate(False)
@@ -395,6 +431,7 @@ try:
                  bg="white",
                  anchor="e").pack(fill="x",
                                   pady=(10, 5))
+                 
         entry_username = tk.Entry(form_frame,
                                   font=("Arial", 16),
                                   bg="#f8f9fa",
@@ -651,6 +688,9 @@ try:
 
                     elif dataFromServer == "invalid student code":
                         messagebox.showerror("שגיאה", "קוד תלמיד שגוי")
+                    
+                    elif dataFromServer.startswith("teacher"):
+                        messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
 
                     else:
                         messagebox.showerror("שגיאה", dataFromServer)
@@ -800,6 +840,10 @@ try:
     
 
     def open_grades():
+        if not current_user_role == "teacher" and not current_user_role == "student":
+            messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+            return
+        
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         new_win.title("עמוד ציונים")
@@ -819,7 +863,6 @@ try:
         main_frame = tk.Frame(new_win, bg="white")
         main_frame.place(relx=0.5, rely=0.5, anchor="center", width=500, height=730)
 
-        # Header כמו העמודים הראשונים
         header_frame = tk.Frame(main_frame, bg="#1a73e8", height=150)
         header_frame.pack(fill="x")
         header_frame.pack_propagate(False)
@@ -848,7 +891,6 @@ try:
             bg="#1a73e8"
         ).pack()
 
-        # ממוצע
         avg_frame = tk.Frame(main_frame, bg="#f8fafc", height=90)
         avg_frame.pack(fill="x", padx=25, pady=20)
         avg_frame.pack_propagate(False)
@@ -860,16 +902,39 @@ try:
             fg="#334155",
             bg="#f8fafc"
         ).pack(pady=(10, 0))
+        
+        if current_user_role == "teacher" or current_user_role == "student":
+            grades = [] 
+        
+        else:
+            grades = [
+                ("מתמטיקה", 95),
+                ("אנגלית", 88),
+                ("מדעים", 91),
+                ("לשון", 84),
+                ("היסטוריה", 90),
+                ("תנ\"ך", 93),
+                ("ספרות", 87),
+                ("גמרא", 97)
+        ] 
 
+        total = 0
+        for sub, grd in grades:
+            total += grd
+        
+        try:
+            average = round(total / len(grades), 2)
+        except ZeroDivisionError:
+            average = 0
+        
         tk.Label(
             avg_frame,
-            text="89.5",
+            text=str(average),
             font=("Arial", 28, "bold"),
             fg="#1a73e8",
-            bg="#f8fafc"
+            bg="#f8fafc",
         ).pack()
 
-        # אזור גלילה לציונים
         list_container = tk.Frame(main_frame, bg="#f8fafc")
         list_container.pack(fill="both", expand=True, padx=25, pady=10)
 
@@ -896,18 +961,6 @@ try:
 
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
-
-        # דוגמת ציונים
-        grades = [
-            ("מתמטיקה", "95"),
-            ("אנגלית", "88"),
-            ("מדעים", "91"),
-            ("לשון", "84"),
-            ("היסטוריה", "90"),
-            ("תנ\"ך", "93"),
-            ("ספרות", "87"),
-            ("גמרא", "96")
-        ]
 
         for subject, grade in grades:
             card = tk.Frame(
@@ -936,7 +989,6 @@ try:
                 pady=4
             ).pack(side="left", padx=18)
 
-        # כפתור חזרה בסגנון שלך
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
         footer_frame.pack(fill="x", side="bottom")
         footer_frame.pack_propagate(False)
@@ -954,6 +1006,10 @@ try:
         ).pack(pady=15, ipadx=18, ipady=8)
 
     def open_doar():
+        if not current_user_role == "teacher" and not current_user_role == "student":
+            messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+            return
+        
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         new_win.title("עמוד דואר")
@@ -1029,7 +1085,6 @@ try:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
 
-        # הודעות לדוגמה
         messages = [
             ("הודעה מהמורה", "יש להביא מחברת לשיעור מחר"),
             ("מזכירות", "אסיפת הורים ביום חמישי"),
@@ -1065,7 +1120,6 @@ try:
                 justify="right"
             ).pack(anchor="e", padx=15, pady=(3, 8))
 
-        # Footer
         footer_frame = tk.Frame(main_frame, bg="#f8fafc", height=70)
         footer_frame.pack(fill="x", side="bottom")
         footer_frame.pack_propagate(False)
@@ -1083,6 +1137,10 @@ try:
         ).pack(pady=15, ipadx=18, ipady=8)
     
     def open_class_chat():
+        if not current_user_role == "teacher" and not current_user_role == "student":
+            messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+            return
+        
         new_win = tk.Toplevel()
         destroy_and_set_new_window(new_win)
         new_win.title("כניסה לצ'אט כיתתי")
@@ -1379,6 +1437,7 @@ try:
 
         except ConnectionRefusedError:
             messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
+            
         except Exception as e:
             messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
                 
@@ -1430,6 +1489,7 @@ try:
                 highlightbackground="#e2e8f0",
                 highlightthickness=1
             )
+            
             row.pack(fill="x", pady=6)
 
             var = tk.BooleanVar(value=done)
@@ -1458,10 +1518,14 @@ try:
             ).pack(side="right", fill="x", expand=True, padx=15, pady=12)
         
         def add_task_to_gui():
-            add_task(task_text=str(task_entry.get()))
-            tasks.append(str(task_entry.get()))
-            task_entry.delete(0, tk.END)
-
+            if current_user_role == "teacher" or current_user_role == "student":
+                add_task(task_text=str(task_entry.get()))
+                tasks.append(str(task_entry.get()))
+                task_entry.delete(0, tk.END)
+                
+            else:
+                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+                return
             
         for task in tasks:
             add_task(task)
@@ -1486,37 +1550,43 @@ try:
         )
         
         def saveTasks():
-            tasks_json = json.dumps(tasks, ensure_ascii=False)
-            update_message = f"update_tasks|{current_user_class}|{current_username}|{tasks_json}"
+            if current_user_role == "teacher" or current_user_role == "student":
             
-            try:
-                with create_secure_socket() as s:
-                    s.connect((SERVER_IP, PORT))
-                    s.sendall(update_message.encode("utf-8"))
-                    
-                    response = s.recv(1024).decode("utf-8")
-                    if response == "200 ok":
-                        print("[+] Tasks saved to server successfully")
-                    else:
-                        print(f"[-] Server error during save: {response}")
+                tasks_json = json.dumps(tasks, ensure_ascii=False)
+                update_message = f"update_tasks|{current_user_class}|{current_username}|{tasks_json}"
+                
+                try:
+                    with create_secure_socket() as s:
+                        s.connect((SERVER_IP, PORT))
+                        s.sendall(update_message.encode("utf-8"))
                         
-            except Exception as e:
-                messagebox.showwarning("שגיאת סנכרון", f"המשימות נשמרו מקומית אך לא בשרת: {e}")
-
-            with open("tasks.txt", "w", encoding="utf-8") as f:
-                for task in tasks:
-                    f.write(f"{task}\n")
+                        response = s.recv(1024).decode("utf-8")
+                        if response == "200 ok":
+                            print("[+] Tasks saved to server successfully")
+                        else:
+                            print(f"[-] Server error during save: {response}")
+                            
+                except Exception as e:
+                    messagebox.showwarning("שגיאת סנכרון", f"המשימות נשמרו מקומית אך לא בשרת: {e}")
             
+            else:
+                open_main_page(current_username)
+                return
+
             open_main_page(current_username)
         
         def checkIfValid():
-            if task_entry.get().strip() == "":
-                messagebox.showerror("שגיאה", "משימה לא יכולה להיות ריקה")
-                return
-            
-            if len(tasks) == 7:
-                messagebox.showerror("שגיאה", "הגעת למגבלת המשימות")
-                return
+            if current_user_role == "teacher" or current_user_role == "student":
+                if task_entry.get().strip() == "":
+                    messagebox.showerror("שגיאה", "משימה לא יכולה להיות ריקה")
+                    return
+                
+                if len(tasks) == 7:
+                    messagebox.showerror("שגיאה", "הגעת למגבלת המשימות")
+                    return
+                
+            else:
+                pass
             
             add_task_to_gui()
 
@@ -1579,6 +1649,10 @@ try:
                         "תחילת שיעור": start_leason.get(),
                         "מיקוד": focus.get()
                 }
+                
+                if not current_user_role == "teacher" or not current_user_role == "student":
+                    messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+                    return
 
                 if any(value == "" for value in fields.values()):
                         messagebox.showerror("שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
@@ -1957,6 +2031,10 @@ try:
         new_win.resizable(False, False)
 
         def freer_completed():
+            if not current_user_role == "teacher" and not current_user_role == "student":
+                messagebox.showerror("שגיאה", "הירשם כדי להשתמש או לראות את פיצר זה")
+                return
+            
             if days.get() == "" or id.get() == "" or id_s.get() == "" or hr.get() == "" or rs.get() == "":
                 messagebox.showerror("שגיאה", "בבקשה תמלא את כל הפרטים בטופס")
                 return

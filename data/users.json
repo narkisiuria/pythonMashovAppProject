@@ -1,42 +1,12 @@
 {
-    "dvir123": {
+    "dviru123": {
         "id": 1,
-        "password": "d9e3469f280ebba34bdc2d6167a50b8a:6f8bf9bbb8cdb765ddf1c4c609bfb0f3916800d160edc4d4c6889fa7e1e89a99419634e47ff99e0c8d7baab13a712d4db9cb64d1e32926c436038c88a0a5065b",
+        "password": "60296db53351574acd579136fcef4a3e:e3e11e26d33c6ddb5141b1ef4e375128969bbfd266404ada614b29d649727ae7ebfabcafe94e9e508e23fe08bfe356147018eb0c5081f77864def584436ce11d",
         "first_name": "אוריה",
         "last_name": "דביר",
-        "gmail_account": "dviruria@gmail.com",
+        "gmail_account": "dviru123@gmail.com",
         "role": "teacher",
         "class": "9th3",
-        "created_at": "18/04/2026 21:41:56"
-    },
-    "uria123": {
-        "id": 2,
-        "password": "47518fde8c75112fdfb4a06ad2fa4e3c:5bad69b04a4004c4b7046f8676c0a9cd718226e069960a4c83707243e62c03e194078fa06afe6353721c2ce3cf7f9caeababf5269ac2e16a261d3074ef594832",
-        "first_name": "אוריה",
-        "last_name": "נרקיסי",
-        "gmail_account": "nruria@gmail.com",
-        "role": "student",
-        "class": "9th3",
-        "created_at": "18/04/2026 21:45:13"
-    },
-    "ido123": {
-        "id": 3,
-        "password": "7bde9d4f47aee8063c7a53aef2fbb5e1:da651b95ca630d11769db12606f91f67470f5dfb7a9c994c47c834a299216a3a2b634cc473302d7004b5e906cf461d8aed6a6f1e832722cadd64f567ba774fa5",
-        "first_name": "עידו",
-        "last_name": "קוואס",
-        "gmail_account": "idokav@gmail.com",
-        "role": "student",
-        "class": "9th3",
-        "created_at": "18/04/2026 21:50:29"
-    },
-    "rannen123": {
-        "id": 4,
-        "password": "f8725e20e9d4c4ddf740b18f089d8fdc:57636bc4d08e312e447b7a75d84b0a688594498239a718c442cfe1dea67293664fd19407f48f9cc0c48d99eef35bf8c58598084d2e3def507eaad0a44cfc2982",
-        "first_name": "רנן",
-        "last_name": "ערוסי",
-        "gmail_account": "arusir@gmail.com",
-        "role": "student",
-        "class": "9th3",
-        "created_at": "18/04/2026 22:07:51"
+        "created_at": "22/04/2026 21:45:19"
     }
 }

@@ -1,45 +1,17 @@
 {
-    "dvir123": {
-        "id": 5,
+    "dviru123": {
+        "id": 1,
         "first_name": "אוריה",
         "last_name": "דביר",
-        "gmail_account": "dviruria@gmail.com",
+        "gmail_account": "dviru123@gmail.com",
         "role": "teacher",
         "class": "9th3",
-        "tasks": [],
-        "created_at": "18/04/2026 21:41:56"
-    },
-    "uria123": {
-        "id": 6,
-        "first_name": "אוריה",
-        "last_name": "נרקיסי",
-        "gmail_account": "nruria@gmail.com",
-        "role": "student",
-        "class": "9th3",
         "tasks": [
-            "שיעורי בית",
-            "אוכל"
+            "jsjcs",
+            "sefse",
+            "sff"
         ],
-        "created_at": "18/04/2026 21:45:13"
-    },
-    "ido123": {
-        "id": 3,
-        "first_name": "עידו",
-        "last_name": "קוואס",
-        "gmail_account": "idokav@gmail.com",
-        "role": "student",
-        "class": "9th3",
-        "tasks": [],
-        "created_at": "18/04/2026 21:50:29"
-    },
-    "rannen123": {
-        "id": 4,
-        "first_name": "רנן",
-        "last_name": "ערוסי",
-        "gmail_account": "arusir@gmail.com",
-        "role": "student",
-        "class": "9th3",
-        "tasks": [],
-        "created_at": "18/04/2026 22:07:51"
+        "created_at": "22/04/2026 21:45:19",
+        "grades": "is teacher"
     }
 }

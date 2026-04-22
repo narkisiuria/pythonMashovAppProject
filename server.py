@@ -170,8 +170,18 @@ try:
                 try:
                     with open(class_file_path, "r", encoding='utf-8') as f:
                         class_users = json.load(f)
+                        target_class = class_name
+
+                        teacher_exists = any(user['role'] == 'teacher' and user['class'] == target_class 
+                                            for user in class_users.values())
+
+                        if teacher_exists:
+                            conn.sendall("teacher allready exists in this class".encode('utf-8'))
+                            return
+                            
                         if isinstance(class_users, list):
                             class_users = {u.get("username", str(i)): u for i, u in enumerate(class_users)}
+                            
                 except (FileNotFoundError, json.JSONDecodeError):
                     class_users = {}
 
@@ -183,8 +193,9 @@ try:
                     "role": role,
                     "class": class_name,
                     "tasks": [],
-                    "created_at": timeCreated
-                }
+                    "created_at": timeCreated,
+                    "grades": [] if role == "student" else "is teacher"
+                    }
                 
                 os.makedirs(os.path.dirname(class_file_path), exist_ok=True)
                 with open(class_file_path, "w", encoding='utf-8') as f:
@@ -285,7 +296,6 @@ try:
                     
                     dataFromClient = rawDataFromClient.decode('utf-8').strip()
                     
-                    # ניתוב בקשות הלקוח לפונקציות השונות במחלקה
                     if dataFromClient.startswith("login|"):
                         print("[+] received sensitive data. cannot show info") 
                         self.handle_login(conn, addr, dataFromClient)
@@ -310,6 +320,20 @@ try:
                     elif dataFromClient.startswith("update_tasks|"):
                         print(f"[+] subject received: update_tasks | ({addr})")
                         self.handle_update_tasks(conn, dataFromClient)
+                        
+                    elif dataFromClient == "guest":
+                        with self.db_lock:
+                            with open("data/server_connection_logs.json", "a", encoding="utf-8") as f:
+                                log_fields = {
+                                    "time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
+                                    "address": str(addr),
+                                    "status": "guest"
+                                }
+                                print(f"[+] writing a connection log for guest: {addr}")
+                                f.write(json.dumps(log_fields, ensure_ascii=False) + "\n")
+                                print("[+] completed writing the connection log.")
+                                conn.sendall("200 ok".encode('utf-8'))
+                                return
                         
                     else:
                         print(f"[+] Unknown command received: {dataFromClient} | ({addr})")
