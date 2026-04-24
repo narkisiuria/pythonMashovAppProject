@@ -691,12 +691,16 @@ try:
                     
                     elif dataFromServer.startswith("teacher"):
                         messagebox.showerror("שגיאה", "מורה כבר קיים בכיתה המבוקשת")
+                    
+                    elif dataFromServer.startswith("error|"):
+                        messagebox.showerror("שגיאת שרת", "שגיאת שרת: 500")
 
                     else:
                         messagebox.showerror("שגיאה", dataFromServer)
 
             except ConnectionRefusedError:
                 messagebox.showerror("שגיאה", "לא ניתן להתחבר לשרת")
+                
             except Exception as e:
                 messagebox.showerror("שגיאה", f"אירעה שגיאה: {e}")
 
@@ -1637,7 +1641,6 @@ try:
         new_win.geometry(f"{width}x{height}+{x}+{y}")
 
         def reminder_completed():
-                
                 fields = {
                         "כיתה": classt.get(),
                         "לשים לב ל": keep_an_eye.get(),

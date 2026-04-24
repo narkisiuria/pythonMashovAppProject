@@ -21,29 +21,38 @@ try:
         def load_users(self):
             with self.db_lock:
                 try:
+                    print("[+] oppening data/users.json and reading it")
                     with open("data/users.json", "r", encoding="utf-8") as f:
+                        print("[+] oppend data/users.json")
+                        print("[+] returing the data of users")
                         return json.load(f)
+                    
                 except FileNotFoundError:
                     print("Error: data/users.json not found. Please create it.")
                     return {}
+                
                 except Exception as e:
                     print(f"Error loading users: {e}")
                     return {}
 
         def log_connection(self, addr, username, status):
             with self.db_lock:
+                print("[+] oppening data/server_connection_logs.json")
                 with open("data/server_connection_logs.json", "a", encoding="utf-8") as f:
+                    print("[+] successfuly oppend data/server_connection_logs.json")
                     log_fields = {
                         "time": datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
                         "address": str(addr),
                         "username": username,
                         "status": status
                     }
+                    
                     print(f"[+] writing a connection log for client: {addr}")
                     f.write(json.dumps(log_fields, ensure_ascii=False) + "\n")
                     print("[+] completed writing the connection log.")
 
         def handle_login(self, conn, addr, dataFromClient):
+            print("[+] handling log in")
             client_ip = addr[0]
             parts = dataFromClient.split("|")
             
@@ -52,15 +61,19 @@ try:
                 conn.sendall("400 bad request".encode('utf-8'))
                 return
 
+            print("[+] getting username + password from client")
             username = parts[1]
             passwordFromClient = parts[2]
+            print("[+] successfuly got the username + password from the client")
             
             with self.attempts_lock:
                 current_attempts = self.failed_attempts_tracker.get(client_ip, 0)
             
             if current_attempts >= self.attempt_limit:
+                print("[*] attempt limit reached detected!")
+                print("[*] blocking attemptor")
                 conn.sendall("attempt limit reached".encode("utf-8"))
-                print(f"[+] Blocked login attempt from {client_ip} (Limit reached)")
+                print(f"[+] successfuly blocked login attempt from client: {client_ip} hint: (Limit reached)")
                 return
 
             print("[+] loading users")
@@ -69,20 +82,29 @@ try:
             
             status = "failed"
             if username in users:
+                print("[+] username is in users")
+                print("[+] collecting user's data")
                 userData = users[username]
                 storedPassword = userData.get("password", "")
+                print("[+] suucessfuly collected user's data")
                 
                 if ":" in storedPassword:
+                    print("[+] found that ':' is in user's data")
                     salt_hex, stored_hash_hex = storedPassword.split(":")
                     salt = bytes.fromhex(salt_hex)
                     stored_hash = bytes.fromhex(stored_hash_hex)
                     
                     if hashingAlg.verify_password(salt, stored_hash, passwordFromClient):
+                        print("[+] login suuccesful")
                         print(f"[+] sending '200 ok' to client: {addr}")
-                        role = userData.get("role", "student") # מתוקן מ-roll
+                        print("[+] getting user's role")
+                        role = userData.get("role", "student") 
+                        print("[+] getting user's class name")
                         class_name = userData.get("class", "unknown")
+                        print("[+] sending client his role|class name")
                         conn.sendall(f"200 ok|{role}|{class_name}".encode("utf-8"))
-                        print("[+] sent.")
+                        print("[+] successfuly sent client his role|class name")
+                        print["[*] status is success"]
                         status = "success"
                         
                         with self.attempts_lock:
@@ -99,60 +121,89 @@ try:
         def _send_unauthorized(self, conn, addr, client_ip):
             print(f"[+] sending '401 unauthorized' to client: {addr}")
             conn.sendall("401 unauthorized".encode('utf-8'))
-            print("[+] sent.")
+            print(f"[+] suuccessfuly sent 401 unauthorized to client: {addr}")
             with self.attempts_lock:
+                print("[+] updating attempts lock")
                 self.failed_attempts_tracker[client_ip] = self.failed_attempts_tracker.get(client_ip, 0) + 1
+                print("[+] geting faild attempt")
                 print(f"[+] Failed attempt {self.failed_attempts_tracker[client_ip]} from {client_ip}")
 
         def handle_signup(self, conn, addr, dataFromClient):
             parts = dataFromClient.split("|")
             if len(parts) != 9:
-                print(f"[+] sending '400 bad request' to client: {addr}")
+                print("[*] found that the length of the request from the client is not equle to 9")
+                print(f"[+] sending '400 bad request' to client: {addr}. hint: (check length of request)")
                 conn.sendall("400 bad request".encode('utf-8'))
+                print(f"successfuly sent 400 bad request to client: {addr}")
                 return
 
             print("[+] analyzing the data")
             firstName, lastName, gmail, newUsername, newPassword = parts[1:6]
+            print(f"[+] done analyzing the data of user: {addr}")
             
+            print("[+] getting class map")
             class_map = {
                 "ט1": "9th1", "ט2": "9th2", "ט3": "9th3",
                 "ט4": "9th4", "ט5": "9th5", "ט6": "9th6"
             }
             
+            print("[+] getting user's class name|role|access code")
             class_raw = parts[6].strip()
             class_name = class_map.get(class_raw, class_raw)
             role = parts[7]
             access_code = parts[8]
+            print("[+] getting current time")
             timeCreated = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            print(f"[+] time created is: '{timeCreated}'")
 
-            print("[+] opening users.json")
+            print("[+] opening data/users.json")
             with self.db_lock:
                 try:
                     with open("data/users.json", "r", encoding='utf-8') as f:
+                        print("[+] getting global users data")
                         global_users = json.load(f)
+                        print("[+] suucessfuly got global users data")
                         
                 except FileNotFoundError:
+                    print("[*] did not find file data/users.json")
+                    print("[*] assinging a an empty list")
                     global_users = {}
                     
                 for u_name, data in global_users.items():
                     if data.get("gmail_account") == gmail:
                         print(f"[+] found email for user: {u_name}")
+                        print(f"[+] sending gmail already exists to client: {addr}")
                         conn.sendall("gmail already exists".encode('utf-8'))
+                        print(f"[+] successfuly sent gmail already exists to client: {addr}")
                         return
 
                 if newUsername in global_users:
                     print("[+] found that username is in use")
+                    print(f"[+] sending username already exists to client: {addr}")
                     conn.sendall("username already exists".encode('utf-8'))
+                    print(f"[+] successfuly sent username already exists to client: {addr}")
                     return
             
             try:
+                print("[+] oppening keys/teachers.key. hint: (teachers code file)")
                 with open("keys/teachers.key", "r", encoding='utf-8') as f:
+                    print("[+] successfuly oppened keys/teachers.key. hint: (teachers code file)")
+                    print("[*] getting teachers code")
                     teacher_code = f.read().strip()
-                with open("keys/students.key", "r", encoding='utf-8') as f:
+                    print("[+] got teachers code")
+                    
+                print("[+] oppening keys/students.key. hint: (students code file)")
+                with open("keys/students.key", "r", encoding='utf-8') as f:  
+                    print("[+] successfuly oppened keys/students.key. hint: (students code file)")
+                    print("[*] getting students code")
                     student_code = f.read().strip()
+                    print("[+] got students code")
+                    
             except FileNotFoundError:
                 print("[-] Key files missing!")
+                print("[*] sending ")
                 conn.sendall("error|server configuration error".encode("utf-8"))
+                print("[*] successfult sent client side a server config error")
                 return
 
             if role == "teacher" and access_code != teacher_code:
@@ -175,7 +226,7 @@ try:
                         teacher_exists = any(user['role'] == 'teacher' and user['class'] == target_class 
                                             for user in class_users.values())
 
-                        if teacher_exists:
+                        if teacher_exists and role == "teacher":
                             conn.sendall("teacher allready exists in this class".encode('utf-8'))
                             return
                             

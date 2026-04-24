@@ -276,3 +276,7 @@
 {"time": "22/04/2026 21:48:02", "address": "('127.0.0.1', 34814)", "status": "guest"}
 {"time": "22/04/2026 21:48:36", "address": "('127.0.0.1', 34816)", "username": "", "status": "failed"}
 {"time": "22/04/2026 21:49:01", "address": "('127.0.0.1', 57731)", "username": "dviru123", "status": "success"}
+{"time": "24/04/2026 17:34:33", "address": "('127.0.0.1', 65196)", "username": "1", "status": "failed"}
+{"time": "24/04/2026 17:35:46", "address": "('127.0.0.1', 51098)", "username": "1", "status": "success"}
+{"time": "24/04/2026 17:37:00", "address": "('127.0.0.1', 51113)", "status": "guest"}
+{"time": "24/04/2026 17:44:23", "address": "('127.0.0.1', 34383)", "username": "yair123", "status": "success"}

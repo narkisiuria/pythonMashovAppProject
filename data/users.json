@@ -8,5 +8,35 @@
         "role": "teacher",
         "class": "9th3",
         "created_at": "22/04/2026 21:45:19"
+    },
+    "1": {
+        "id": 2,
+        "password": "537eec68c8edb15f5fe6cc3fae12a9ac:bbb503ffc36656e93eeae5761f31b0e7bd2b3890c7c17f305f509eb4cbe1776da36ad78619f9d16a97334404ecb9622cadd3f4ba8868cf192cef491d595a8512",
+        "first_name": "test",
+        "last_name": "test",
+        "gmail_account": "example@gmail.com",
+        "role": "teacher",
+        "class": "9th1",
+        "created_at": "24/04/2026 17:35:34"
+    },
+    "yair123": {
+        "id": 3,
+        "password": "7b377f50d0736f1ad9e3acb3dbaa98a1:9bba7ae552787eb70daf6d3f5fc5f302466411d6820048eba79c5f5f914f4fb062ba3510aa83623bdea230a2d3485b3c67ad8d03463892c86007283886b9f54b",
+        "first_name": "yair",
+        "last_name": "choen",
+        "gmail_account": "yair123@gmail.com",
+        "role": "teacher",
+        "class": "9th2",
+        "created_at": "24/04/2026 17:44:14"
+    },
+    "tbrbrt": {
+        "id": 4,
+        "password": "3a3da3537677f0d9dcbb6ebaecf5d80d:2a72d17bfa9042c2d2ab39c6b9f680da3be9bb578c25f86ffcedd8e22889b9cea8a8e7dffae9acb57163208970f71dcbeeeb5a5018462ccd7eb84042553c9655",
+        "first_name": "vbetb",
+        "last_name": "tbrtb",
+        "gmail_account": "rtbrtb@gmail.com",
+        "role": "student",
+        "class": "9th2",
+        "created_at": "24/04/2026 18:27:13"
     }
 }
